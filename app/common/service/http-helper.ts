@@ -1,0 +1,46 @@
+﻿import {Http, RequestOptions, RequestMethod, Request, Headers} from '@angular/http';
+import {Inject} from '@angular/core';
+import {AppSettings} from './app-settings';
+
+
+export class HttpHelper {
+
+    constructor( @Inject(Http) public http: Http) {
+        
+    }
+
+
+    makeHttpCall(url:string, body:string, method: string, useAuth: boolean) { 
+
+        let appPath = location.pathname.split('/')[1];
+
+        let header = new Headers({
+            'Content-Type': 'application/json'
+            
+        });
+
+        //if we are using auth, we replace the header
+        if (useAuth) {
+
+            var userToken = localStorage.getItem("id_token")
+            console.log(userToken);
+
+            header = new Headers({
+                'Authorization': userToken,
+                'Content-Type': 'application/json'
+            });
+        }
+       
+        let options = new RequestOptions({
+            method: method,
+            url: `${AppSettings.API_ENDPOINT}${url}`,
+            headers: header,
+            body: body
+
+        });
+
+        let req = new Request(options);
+        
+        return this.http.request(req);
+    }
+}

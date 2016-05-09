@@ -5,12 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="styles.css">
 
+    <link href="node_modules/font-awesome/css/font-awesome.min.css" rel="stylesheet"  />
+    <link href="node_modules/ag-grid/dist/styles/ag-grid.css" rel="stylesheet"  />
+    <link href="node_modules/ag-grid/dist/styles/theme-blue.css" rel="stylesheet"  />
+    <link href="css/bootstrap.min.css" rel="stylesheet" />
+    <link href="css/superfish.css" rel="stylesheet" async />
+    <link href="css/superfish-vertical.css" rel="stylesheet" async />
+
     <!-- Polyfill(s) for older browsers -->
     <script src="node_modules/es6-shim/es6-shim.min.js"></script>
 
     <script src="node_modules/zone.js/dist/zone.js"></script>
     <script src="node_modules/reflect-metadata/Reflect.js"></script>
     <script src="node_modules/systemjs/dist/system.src.js"></script>
+    
+    
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=geometry" async></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.0/jquery.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/js/bootstrap.js"></script>
 
     <script src="systemjs.config.js"></script>
     <script>
@@ -19,6 +31,7 @@
   </head>
 
   <body>
-    <my-app>Loading...</my-app>
+     <br>
+     <app><span style="padding-left:10px;"><i class='fa fa-spinner fa-spin'></i> Loading menu...</span></app>
   </body>
 </html>

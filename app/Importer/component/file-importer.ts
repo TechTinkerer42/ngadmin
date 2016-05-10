@@ -1,16 +1,27 @@
-﻿import {Component, Inject, EventEmitter, Input,ReflectiveInjector} from '@angular/core'
+﻿import {Component, Inject, EventEmitter, Input} from '@angular/core'
 import {ControlGroup, FormBuilder, Validators, AbstractControl, FORM_DIRECTIVES} from '@angular/common';
 
 import {ControlMessages} from '../../common/component/control-messages-component';
 import {MessagePanel} from '../../common/component/message-panel';
 import {ValidationService} from '../../common/service/validation-service';
-import {FormBase} from '../../common/service/form-base';
+import {ComponentBase} from '../../common/component/component-base';
+
+
 import {FileImporterService} from '../service/file-importer-service'; 
 import {MODAL_DIRECTIVES} from 'ng2-bs3-modal/ng2-bs3-modal';
 import {FileImportColumn} from '../service/file-import-column-model'
 import {Response} from '@angular/http';
-import {CanActivate} from '@angular/router-deprecated';
-import {AuthService} from '../../common/service/auth-service';
+
+//@CanActivate((next, prev) => {
+
+//    let injector: any = ReflectiveInjector.resolveAndCreate([AuthService]);
+//    let authService: AuthService = injector.get(AuthService);
+//    return authService.checkLogin();
+
+
+
+
+//})
 
 @Component({
     providers: [FileImporterService],
@@ -99,13 +110,7 @@ import {AuthService} from '../../common/service/auth-service';
 })
 
 
-
-@CanActivate((next, previous) => {
-    let injector: any = ReflectiveInjector.resolveAndCreate([AuthService]);
-    let authService: AuthService = injector.get(AuthService);
-    return authService.checkLogin(next, previous);
-})  
-export class FileImporter extends FormBase {
+export class FileImporter extends ComponentBase {
     constructor(
         @Inject(FormBuilder) public fb: FormBuilder,
         @Inject(FileImporterService) public fileImporterService: FileImporterService) {
@@ -204,13 +209,22 @@ export class FileImporter extends FormBase {
                 },
                 err => {
                     this.waiting = false;
-                    console.log(err);
-                    let alertMessage = 'System Error Occurred';
-                    if (err._body) {
-                        alertMessage += ": " + err._body;
-                    }
-                    this.alertMessage = alertMessage;
+                    let alertMessage = '';
                     this.alertType = "danger";
+                    
+                    if (err.status == "403") {
+                        alertMessage = "Unauthorized access";
+                        
+                    }
+                    else {
+                        alertMessage = "System error occurred";
+                        if (err._body) {
+                            alertMessage += ": " + err._body;
+                        }   
+                    }
+                    
+                    this.alertMessage = alertMessage;
+                    
                 }
                 );
         }
@@ -313,6 +327,7 @@ export class FileImporter extends FormBase {
     
 
     getFileUploadColumns(tableChoice: string) {
+        
         this.setupFileImportColumns();
 
         this.waiting = true;

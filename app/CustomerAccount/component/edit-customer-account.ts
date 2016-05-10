@@ -3,7 +3,7 @@ import {ControlGroup, FormBuilder, Validators, AbstractControl, FORM_DIRECTIVES}
 import {ControlMessages} from '../../common/component/control-messages-component';
 import {MessagePanel} from '../../common/component/message-panel';
 import {ValidationService} from '../../common/service/validation-service';
-import {FormBase} from '../../common/service/form-base';
+import {ComponentBase} from '../../common/component/component-base';
 import {CustomerAccountService} from '../service/customer-account-service';
 import {CustomerAccount} from '../service/customer-account-model';
 
@@ -76,7 +76,7 @@ import {CustomerAccount} from '../service/customer-account-model';
     `
 })
 
-export class EditCustomerAccount extends FormBase {
+export class EditCustomerAccount extends ComponentBase {
 
     constructor(
         @Inject(FormBuilder) public fb: FormBuilder,

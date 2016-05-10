@@ -50,11 +50,11 @@ export class CustomerAccountService {
     }
 
     getCustomerAccounts() {
-        return this.httpHelper.makeHttpCall('AngularAdmin/GetCustomerAccounts', '', 'GET', true);
+        return this.httpHelper.makeHttpCall('AngularAdmin/GetCustomerAccounts', '', 'GET');
     }
 
     AccountNumberValid(val:string) {
-        return this.httpHelper.makeHttpCall('AngularAdmin/AccountNumberValid', JSON.stringify({ val: val }), 'POST', false)
+        return this.httpHelper.makeHttpCall('AngularAdmin/AccountNumberValid', JSON.stringify({ val: val }), 'POST')
     }
 
     

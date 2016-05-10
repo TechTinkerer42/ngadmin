@@ -7,17 +7,17 @@ import {JwtHelper} from 'angular2-jwt';
 
 import {appInjector} from './app-injector';
 
+import {StateVariables} from './state-variables-service';
+
+
 @Injectable()
 export class AuthService {
-    
-    
-    
     
     jwtHelper: JwtHelper = new JwtHelper();
 
     public checkLogin(next: any, previous: any): boolean {
         
-        console.log(next,previous);
+        //console.log(next,previous);
         
         console.log('checking login!!');
 
@@ -51,7 +51,9 @@ export class AuthService {
 
         
         if (!isValid) {
-            router.navigate(['/Login',{ref:next.routeName}]);
+            //console.log(next);
+            StateVariables.referredRoute = next.routeName;
+            router.navigate(['/Login']);
         }
 
 
@@ -59,7 +61,7 @@ export class AuthService {
 
 
         return isValid;
-        
+         
     }   
    
 }

@@ -1,15 +1,14 @@
 ﻿
 
 import {Inject, Injectable} from '@angular/core'
-import {ServiceBase} from './service-base';
 import {Observable} from 'rxjs/Observable'
 import {HttpHelper} from './http-helper';
 
 @Injectable()
-export class CommonService extends ServiceBase {
+export class CommonService {
 
     constructor( @Inject(HttpHelper) public httpHelper: HttpHelper) {
-        super();
+        
 
 
     }
@@ -17,7 +16,7 @@ export class CommonService extends ServiceBase {
    
     getApplications() {
 
-        return this.httpHelper.makeHttpCall('AngularAdmin/FillAvailableApps', JSON.stringify({ includeParentApps: true, orderByCustomer: false }), 'POST', false)
+        return this.httpHelper.makeHttpCall('AngularAdmin/FillAvailableApps', JSON.stringify({ includeParentApps: true, orderByCustomer: false }), 'POST')
             .map((response) => response.json());
             
         

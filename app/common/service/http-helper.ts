@@ -10,7 +10,7 @@ export class HttpHelper {
     }
 
 
-    makeHttpCall(url:string, body:string, method: string, useAuth: boolean) { 
+    makeHttpCall(url:string, body:string, method: string, useAuth: boolean = true) { 
 
         let appPath = location.pathname.split('/')[1];
 
@@ -23,7 +23,7 @@ export class HttpHelper {
         if (useAuth) {
 
             var userToken = localStorage.getItem("id_token")
-            console.log(userToken);
+            //console.log(userToken);
 
             header = new Headers({
                 'Authorization': userToken,

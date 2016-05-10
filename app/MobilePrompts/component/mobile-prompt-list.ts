@@ -87,6 +87,7 @@ export class MobilePromptList extends ComponentBase {
 
     constructor( @Inject(MobilePromptService) public mobilePromptService: MobilePromptService) { 
         
+        super();
         this.columnDefs = [
             { headerName: "ID", field: "promptID", width: 75 },
             { headerName: "Key", field: "key"},

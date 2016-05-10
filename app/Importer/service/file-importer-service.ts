@@ -12,15 +12,15 @@ export class FileImporterService {
     }
     
     getFileUploadColumns(tableChoice: string) {
-        return this.httpHelper.makeHttpCall('AngularAdmin/GetFileUploadColumns', JSON.stringify({ tableChoice: tableChoice }), 'POST', false);
+        return this.httpHelper.makeHttpCall('AngularAdmin/GetFileUploadColumns', JSON.stringify({ tableChoice: tableChoice }), 'POST',false);
     }
 
     getSampleData(index:number, tableChoice:string,fileImportColumns:any) {
-        return this.httpHelper.makeHttpCall('AngularAdmin/GetSampleData', JSON.stringify({ index: index,tableChoice: tableChoice,fileImportColumns: fileImportColumns }), 'POST', false);
+        return this.httpHelper.makeHttpCall('AngularAdmin/GetSampleData', JSON.stringify({ index: index,tableChoice: tableChoice,fileImportColumns: fileImportColumns }), 'POST',false);
     }
     
     processFileImportColumns(tableChoice:string,fileImportColumns:any) {
-        return this.httpHelper.makeHttpCall('AngularAdmin/ProcessFileImportColumns', JSON.stringify({ tableChoice: tableChoice,fileImportColumns: fileImportColumns }), 'POST', false)
+        return this.httpHelper.makeHttpCall('AngularAdmin/ProcessFileImportColumns', JSON.stringify({ tableChoice: tableChoice,fileImportColumns: fileImportColumns }), 'POST')
     }
     
     uploadFileToImport(data: any) {

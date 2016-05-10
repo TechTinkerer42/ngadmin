@@ -83,7 +83,7 @@ import {enableProdMode} from '@angular/core';
     { path: '/mobilepromptslist', name: 'MobilePromptList', component: MobilePromptList },
     { path: '/fileimport/', name: 'FileImporter', component: FileImporter },
     { path: '/geocoder/', name: 'Geocoder', component: Geocoder },
-    { path: '/login/:ref', name: 'Login', component: LoginComponent },
+    { path: '/login/', name: 'Login', component: LoginComponent },
         
         
 ])

@@ -15,7 +15,7 @@ export class UserService {
     
     getUserApplications() {
 
-        return this.httpHelper.makeHttpCall('AngularAdmin/GetUserApplications', '', 'GET', false)
+        return this.httpHelper.makeHttpCall('AngularAdmin/GetUserApplications', '', 'GET')
             .map((response: Response) => <UserApplication[]>response.json());
             
 

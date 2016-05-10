@@ -5,17 +5,17 @@ import {ControlGroup, FormBuilder, Validators, AbstractControl, FORM_DIRECTIVES}
 import {ControlMessages} from '../../common/component/control-messages-component';
 import {MessagePanel} from '../../common/component/message-panel';
 import {ValidationService} from '../../common/service/validation-service';
-import {FormBase} from '../../common/service/form-base';
+import {ComponentBase} from '../../common/component/component-base';
 import {LoginService} from '../service/login-service';
 import {appInjector} from '../../common/service/app-injector';
-
+import {StateVariables} from '../../common/service/state-variables-service';
 
 @Component({
     directives: [ControlMessages, FORM_DIRECTIVES,  MessagePanel],
     providers: [LoginService],
     template: `
         <div class="container-fluid">
-        <div class="row">
+        <div class="row" class="col-md-3">
             <form [ngFormModel]="loginForm" (ngSubmit)="loginUser()">
 
             <div *ngIf="alertMessage"><div class="alert alert-info" role="alert">{{alertMessage}}</div></div>
@@ -46,7 +46,7 @@ import {appInjector} from '../../common/service/app-injector';
         
 })
 
-export class LoginComponent extends FormBase implements OnInit {
+export class LoginComponent extends ComponentBase implements OnInit {
     constructor(
     @Inject(FormBuilder) public fb: FormBuilder,
     @Inject(LoginService) public loginService: LoginService,
@@ -97,7 +97,7 @@ export class LoginComponent extends FormBase implements OnInit {
         this.loginService.loginUser(data)
             .subscribe(
             mp => {
-                console.log(mp.token);
+                //console.log(mp.token);
                 localStorage.setItem('id_token',mp.token);
                 this.waiting = false;
                 //go to where we were before
@@ -105,11 +105,9 @@ export class LoginComponent extends FormBase implements OnInit {
                 let injector: Injector = appInjector(); // get the stored reference to the injector
 	            let router: Router = injector.get(Router);
         
-                let ref = this.routeParams.get('ref');
-                
-                if(ref)
+                if(StateVariables.referredRoute)
                 {
-                    router.navigate([ref]);        
+                    router.navigate([StateVariables.referredRoute]);        
                 }
                 
             },

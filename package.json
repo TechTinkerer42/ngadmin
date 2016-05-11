@@ -4,6 +4,7 @@
   "description": "QuickStart package.json from the documentation, supplemented with testing support",
   "scripts": {
     "start": "concurrently \"npm run tsc:w\" \"npm run lite\" ",
+    "build": "npm run tsc:w",
     "lite": "lite-server",
     "postinstall": "typings install",
     "tsc": "tsc",

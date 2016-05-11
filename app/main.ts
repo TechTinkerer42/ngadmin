@@ -4,6 +4,7 @@ import {bootstrap}  from '@angular/platform-browser-dynamic';
 import {Component, provide, Inject} from '@angular/core';
 import {HttpHelper} from './common/service/http-helper';
 import {CommonService} from './common/service/common-service';
+import {AuthService} from './common/service/auth-service';
 
 
 
@@ -26,6 +27,8 @@ import {
     RouteConfig,
     Router
     
+    
+    
 
 } from '@angular/router-deprecated';
 
@@ -34,7 +37,8 @@ import {
     APP_BASE_HREF,
     HashLocationStrategy,
     PathLocationStrategy,
-    LocationStrategy
+    LocationStrategy,
+    
 } from '@angular/common'; 
 
 import {enableProdMode} from '@angular/core';
@@ -83,18 +87,23 @@ import {enableProdMode} from '@angular/core';
     { path: '/mobilepromptslist', name: 'MobilePromptList', component: MobilePromptList },
     { path: '/fileimport/', name: 'FileImporter', component: FileImporter },
     { path: '/geocoder/', name: 'Geocoder', component: Geocoder },
-    { path: '/login/', name: 'Login', component: LoginComponent },
+    { path: '/login/', name: 'Login', component: LoginComponent, useAsDefault: true },
         
         
 ])
 
 
-export class Main  {
+export class Main   {
 
+    
     constructor( @Inject(Router) private router: Router) {
         
+        
+        
+        
     }
-
+    
+   
     
 }
 

@@ -5,6 +5,7 @@ import {Observable} from 'rxjs/Observable';
 import {GoogleGeocoder} from '../../common/service/google-geocoder-service'; 
 import {CanActivate} from '@angular/router-deprecated';
 import {AuthService} from '../../common/service/auth-service';
+import {ComponentBase} from '../../common/component/component-base';
 
 @Component({
     providers: [GeocoderService, GoogleGeocoder],
@@ -81,13 +82,13 @@ import {AuthService} from '../../common/service/auth-service';
 })  
 
 
-export class Geocoder {
+export class Geocoder extends ComponentBase {
 
     constructor(
         @Inject(GeocoderService) public geocoderService: GeocoderService,
         @Inject(GoogleGeocoder) public googleGeocoderService: GoogleGeocoder) {
 
-        
+        super();
     }
 
     locationsToGeocode = new Array<StoreLocation>();
@@ -161,8 +162,8 @@ export class Geocoder {
             },
             err => {
                 this.waiting = false;
-                console.log(err);
-                alert("Error retrieving locations");
+                this.showErrors(err,'Error retrieving locations')
+                
             }
             );
     }
@@ -178,6 +179,7 @@ export class Geocoder {
             },
             err => {
                 console.log(err);
+                this.showErrors(err,'Error saving geocoding locations')
             });
     }
 

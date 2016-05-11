@@ -3,7 +3,7 @@
 //import {Http, Response, RequestOptions, Request, Headers} from '@angular/http';
 import {HttpHelper} from '../../common/service/http-helper';
 import {Inject, Injectable} from '@angular/core'
-import {AppSettings} from '../../common/service/app-settings';
+import {StateVariables} from '../../common/service/state-variables';
 
 @Injectable()
 export class FileImporterService {
@@ -49,7 +49,7 @@ export class FileImporterService {
 
 
 
-            var url = `${AppSettings.API_ENDPOINT}AngularAdmin/UploadFileToImport`;
+            var url = `${StateVariables.API_ENDPOINT}AngularAdmin/UploadFileToImport`;
 
             xhr.open("POST", url, true);
             xhr.send(fd);

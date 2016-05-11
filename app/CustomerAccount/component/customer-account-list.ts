@@ -78,7 +78,7 @@ export class CustomerAccountList extends ComponentBase {
         this.columnDefs = [
             { headerName: "Account ID", field: "Account_ID", width: 120 },
             { headerName: "Account", field: "Account_Name", width: 600 },
-            { headerName: "Account App#", field: "Account_AppNumber", width: 100 }
+            { headerName: "Account App#", field: "Account_AppNumber", width: 150 }
         ];
 
         this.gridOptions = {
@@ -158,7 +158,7 @@ export class CustomerAccountList extends ComponentBase {
             },
             err => {
                 this.gridOptions.api.hideOverlay();
-                this.showErrors(err);
+                this.showErrors(err,'Error retrieving user customer accounts');
             }
             );
     }

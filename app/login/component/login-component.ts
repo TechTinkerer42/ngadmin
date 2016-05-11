@@ -8,7 +8,7 @@ import {ValidationService} from '../../common/service/validation-service';
 import {ComponentBase} from '../../common/component/component-base';
 import {LoginService} from '../service/login-service';
 import {appInjector} from '../../common/service/app-injector';
-import {StateVariables} from '../../common/service/state-variables-service';
+import {StateVariables} from '../../common/service/state-variables';
 
 @Component({
     directives: [ControlMessages, FORM_DIRECTIVES,  MessagePanel],
@@ -102,13 +102,20 @@ export class LoginComponent extends ComponentBase implements OnInit {
                 this.waiting = false;
                 //go to where we were before
                 
+                
+                
                 let injector: Injector = appInjector(); // get the stored reference to the injector
 	            let router: Router = injector.get(Router);
-        
+         
                 if(StateVariables.referredRoute)
                 {
                     router.navigate([StateVariables.referredRoute]);        
                 }
+                else{
+                    this.alertType = "info";
+                    this.alertMessage = "Successfully logged in";
+                }
+                
                 
             },
             err => {

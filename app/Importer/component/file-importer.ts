@@ -1,27 +1,25 @@
-﻿import {Component, Inject, EventEmitter, Input} from '@angular/core'
+﻿import {Component, Inject, EventEmitter, Input,ReflectiveInjector} from '@angular/core'
 import {ControlGroup, FormBuilder, Validators, AbstractControl, FORM_DIRECTIVES} from '@angular/common';
 
 import {ControlMessages} from '../../common/component/control-messages-component';
 import {MessagePanel} from '../../common/component/message-panel';
 import {ValidationService} from '../../common/service/validation-service';
 import {ComponentBase} from '../../common/component/component-base';
-
+import {AuthService} from '../../common/service/auth-service';
+import {CanActivate} from '@angular/router-deprecated';
 
 import {FileImporterService} from '../service/file-importer-service'; 
 import {MODAL_DIRECTIVES} from 'ng2-bs3-modal/ng2-bs3-modal';
 import {FileImportColumn} from '../service/file-import-column-model'
 import {Response} from '@angular/http';
 
-//@CanActivate((next, prev) => {
-
-//    let injector: any = ReflectiveInjector.resolveAndCreate([AuthService]);
-//    let authService: AuthService = injector.get(AuthService);
-//    return authService.checkLogin();
-
-
+@CanActivate((next, previous) => {
+    let injector: any = ReflectiveInjector.resolveAndCreate([AuthService]);
+    let authService: AuthService = injector.get(AuthService);
+    return authService.checkLogin(next, previous);
+})  
 
 
-//})
 
 @Component({
     providers: [FileImporterService],
@@ -209,21 +207,8 @@ export class FileImporter extends ComponentBase {
                 },
                 err => {
                     this.waiting = false;
-                    let alertMessage = '';
-                    this.alertType = "danger";
                     
-                    if (err.status == "403") {
-                        alertMessage = "Unauthorized access";
-                        
-                    }
-                    else {
-                        alertMessage = "System error occurred";
-                        if (err._body) {
-                            alertMessage += ": " + err._body;
-                        }   
-                    }
-                    
-                    this.alertMessage = alertMessage;
+                    this.showErrors(err,'System Error Occurred');
                     
                 }
                 );
@@ -308,19 +293,10 @@ export class FileImporter extends ComponentBase {
                 if (populateTables) {
                     this.fileImportTables = <Array<string>>result; //we call the submitImportForm when we reupload and call false
                 }
-
-                
-
-               
-                
-
-            }, (error) => {
+            }, 
+            err => {
                 this.waiting = false;
-                console.log(error);
-                this.alertMessage = 'System Error Occurred'
-                this.alertType = "danger";
-
-
+                this.showErrors(err,'System Error Occurred');
             });
     }
 
@@ -340,18 +316,13 @@ export class FileImporter extends ComponentBase {
 
                 cols.forEach(x => this.fileImportColumns.push(new FileImportColumn(x, false)));
                 
-                //console.log(this.fileImportColumns);
-
                 this.getSampleData(0);
-
-               
-               
                 
             },
             err => {
                 this.waiting = false;
-                console.log(err);
-                alert("Error retrieving table columns");
+                this.showErrors(err,'Error retrieving table columns');
+                
             }
             );
     }
@@ -364,16 +335,11 @@ export class FileImporter extends ComponentBase {
                 this.waiting = false;
                 
                 this.sampleData = data.json();
-                
-                
-                
-                
-
             },
             err => {
                 this.waiting = false;
-                console.log(err);
-                alert("Error retrieving table columns");
+                this.showErrors(err,'Error retrieving sample data');
+                
             }
             );
     }

@@ -1,6 +1,6 @@
 ﻿import {Http, RequestOptions, RequestMethod, Request, Headers} from '@angular/http';
 import {Inject} from '@angular/core';
-import {AppSettings} from './app-settings';
+import {StateVariables} from './state-variables';
 
 
 export class HttpHelper {
@@ -33,7 +33,7 @@ export class HttpHelper {
        
         let options = new RequestOptions({
             method: method,
-            url: `${AppSettings.API_ENDPOINT}${url}`,
+            url: `${StateVariables.API_ENDPOINT}${url}`,
             headers: header,
             body: body
 

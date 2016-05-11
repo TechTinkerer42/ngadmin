@@ -240,7 +240,7 @@ export class MobilePromptList extends ComponentBase {
             },
             err => {
                 this.gridOptions.api.hideOverlay();
-                this.showErrors(err);
+                this.showErrors(err,'Error retrieving mobile prompts');
             }
             );
     }

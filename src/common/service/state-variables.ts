@@ -15,6 +15,4 @@ export class StateVariables {
         console.log(result);
         return result; 
     }
-  
-  static referredRoute:string = "";
 }

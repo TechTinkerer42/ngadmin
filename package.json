@@ -3,12 +3,13 @@
   "version": "1.0.0",
   "description": "QuickStart package.json from the documentation, supplemented with testing support",
   "scripts": {
-    "start": "concurrently \"npm run tsc:w\" \"npm run lite\" ",
-    "build": "npm run tsc:w",
+    "start": "concurrently \"npm run webpack:w\" \"npm run lite\" ",
+    "build": "npm run webpack:w",
     "lite": "lite-server",
     "postinstall": "typings install",
     "tsc": "tsc",
     "tsc:w": "tsc -w",
+    "webpack:w": "webpack --watch",
     "typings": "typings"
   },
   "keywords": [],

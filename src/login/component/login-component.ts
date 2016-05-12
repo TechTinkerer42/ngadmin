@@ -1,18 +1,18 @@
 
-import {Component,Inject,OnInit,Injector} from '@angular/core'
-import {Router,RouteParams} from '@angular/router-deprecated'
+import {Component,Inject,OnInit} from '@angular/core'
 import {ControlGroup, FormBuilder, Validators, AbstractControl, FORM_DIRECTIVES} from '@angular/common';
 import {ControlMessages} from '../../common/component/control-messages-component';
 import {MessagePanel} from '../../common/component/message-panel';
 import {ValidationService} from '../../common/service/validation-service';
 import {ComponentBase} from '../../common/component/component-base';
 import {LoginService} from '../service/login-service';
-import {appInjector} from '../../common/service/app-injector';
-import {StateVariables} from '../../common/service/state-variables';
+import {AuthService} from '../../common/service/auth-service';
+
+
 
 @Component({
     directives: [ControlMessages, FORM_DIRECTIVES,  MessagePanel],
-    providers: [LoginService],
+    providers: [LoginService,AuthService],
     template: `
         <div class="container-fluid">
         <div class="row" class="col-md-3">
@@ -46,12 +46,13 @@ import {StateVariables} from '../../common/service/state-variables';
         
 })
 
+//we do this canactivate here just to see if we are logged in or not
+
 export class LoginComponent extends ComponentBase implements OnInit {
     constructor(
     @Inject(FormBuilder) public fb: FormBuilder,
-    @Inject(LoginService) public loginService: LoginService,
-    @Inject(RouteParams) public routeParams: RouteParams
-    ) 
+    @Inject(AuthService) public authService: AuthService,
+    @Inject(LoginService) public loginService: LoginService) 
     { 
         super();
     }
@@ -60,19 +61,23 @@ export class LoginComponent extends ComponentBase implements OnInit {
     alertMessage: string;
     alertType: string;
 
-
     //controls
     loginForm: ControlGroup;
     userName: AbstractControl;
     password: AbstractControl;
+    
     ngOnInit() { 
         this.buildForm();
+        if(this.authService.isTokenValid())
+        {
+            this.alertType = "info";
+            this.alertMessage = "Successfully logged in";
+        }
     }
     
     buildForm() {
         
         this.alertMessage = '';
-        
 
         this.loginForm = this.fb.group({
             'userName': ['', ValidationService.RequiredValidator],
@@ -100,21 +105,9 @@ export class LoginComponent extends ComponentBase implements OnInit {
                 //console.log(mp.token);
                 localStorage.setItem('id_token',mp.token);
                 this.waiting = false;
-                //go to where we were before
                 
-                
-                
-                let injector: Injector = appInjector(); // get the stored reference to the injector
-	            let router: Router = injector.get(Router);
-         
-                if(StateVariables.referredRoute)
-                {
-                    router.navigate([StateVariables.referredRoute]);        
-                }
-                else{
-                    this.alertType = "info";
-                    this.alertMessage = "Successfully logged in";
-                }
+                 this.alertType = "info";
+                 this.alertMessage = "Successfully logged in";
                 
                 
             },

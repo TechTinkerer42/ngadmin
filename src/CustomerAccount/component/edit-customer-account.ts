@@ -168,8 +168,7 @@ export class EditCustomerAccount extends ComponentBase {
                     this.checkingAccountName = true;
                     this.customerAccountService.AccountNumberValid(aName)
                         .subscribe(res => {
-                            console.log(<any>res.json());
-                            if (!<any>res.json()) {
+                            if (!res.json()) {
                                 this.accountName.setErrors({ invalidAccountName: true });
                             }
                             this.checkingAccountName = false;

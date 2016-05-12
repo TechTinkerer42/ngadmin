@@ -16,7 +16,7 @@ export class LoginService {
     loginUser(data:any) {
 
         return this.httpHelper.makeHttpCall('Account/LoginToken', JSON.stringify(data), 'POST')
-            .map((response: Response) => <any>response.json());
+            .map((response: Response) => response.json());
             
 
 

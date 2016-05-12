@@ -10,13 +10,13 @@ export class ComponentBase {
             return !form.find(inputName).valid && form.find(inputName).touched ? 'has-error' : '';
         }
     }
-     
+      
     showErrors(err: any, message:string = ''){
         if (err.status == "403") {
             message = "Unauthorized access";
             localStorage.removeItem("id_token");
             alert(message);
-            window.location.reload();
+            window.location.reload(); 
         }
         
         alert(message);

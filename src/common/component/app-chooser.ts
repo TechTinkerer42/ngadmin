@@ -1,5 +1,5 @@
 ﻿
-import {Component, EventEmitter, Inject} from '@angular/core';
+import {Component, EventEmitter} from '@angular/core';
 
 import {CommonService} from '../service/common-service';
 
@@ -20,7 +20,7 @@ export class ApplicationChooser  {
 
     applications: Array<any>;
     
-    constructor( @Inject(CommonService) public commonService: CommonService) {
+    constructor(public commonService: CommonService) {
         
         this.commonService.getApplications()
             .subscribe(res => {

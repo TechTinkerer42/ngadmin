@@ -16,13 +16,13 @@ import {
     ROUTER_PROVIDERS, 
     ROUTER_PRIMARY_COMPONENT, 
     RouteConfig,
-    Router
+    ROUTER_BINDINGS
+    
     
      
     
 
 } from '@angular/router-deprecated';
-
 
 
 

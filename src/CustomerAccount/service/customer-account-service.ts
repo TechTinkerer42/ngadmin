@@ -1,7 +1,7 @@
 ﻿
 
 
-import {Inject, Injectable} from '@angular/core'
+import {Injectable} from '@angular/core'
 import {HttpHelper} from '../../common/service/http-helper';
 import {CustomerAccount} from './customer-account-model';
 import {Observable} from 'rxjs/Observable'
@@ -11,7 +11,7 @@ import {Observable} from 'rxjs/Observable'
 @Injectable()
 export class CustomerAccountService {
     
-    constructor( @Inject(HttpHelper) public httpHelper: HttpHelper) {
+    constructor( private httpHelper: HttpHelper) {
         
 
        

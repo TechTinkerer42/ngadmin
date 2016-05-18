@@ -1,4 +1,4 @@
-﻿import {Component, Inject, EventEmitter, Input,ReflectiveInjector} from '@angular/core'
+﻿import {Component, EventEmitter, Input,ReflectiveInjector} from '@angular/core'
 import {ControlGroup, FormBuilder, Validators, AbstractControl, FORM_DIRECTIVES} from '@angular/common';
 
 import {ControlMessages} from '../../common/component/control-messages-component';
@@ -110,8 +110,8 @@ import {Response} from '@angular/http';
 
 export class FileImporter extends ComponentBase {
     constructor(
-        @Inject(FormBuilder) public fb: FormBuilder,
-        @Inject(FileImporterService) public fileImporterService: FileImporterService) {
+        private fb: FormBuilder,
+        private fileImporterService: FileImporterService) {
         super();
 
         this.buildForm();

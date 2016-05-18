@@ -1,4 +1,4 @@
-﻿import {Component, Inject,ReflectiveInjector} from '@angular/core'
+﻿import {Component, ReflectiveInjector} from '@angular/core'
 import {AgGridNg2} from 'ag-grid-ng2/main';
 import {GridOptions} from 'ag-grid/main';
 import {SearchComponent} from '../../common/component/searcher';
@@ -85,7 +85,7 @@ export class MobilePromptList extends ComponentBase {
 
     showConfirmOption: boolean = false;
 
-    constructor( @Inject(MobilePromptService) public mobilePromptService: MobilePromptService) { 
+    constructor( private mobilePromptService: MobilePromptService) { 
         
         super();
         this.columnDefs = [

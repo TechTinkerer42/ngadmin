@@ -1,4 +1,4 @@
-﻿import {Component, Inject, EventEmitter, Input} from '@angular/core'
+﻿import {Component, EventEmitter, Input} from '@angular/core'
 import {ControlGroup, FormBuilder, Validators, AbstractControl, FORM_DIRECTIVES} from '@angular/common';
 import {ControlMessages} from '../../common/component/control-messages-component';
 import {MessagePanel} from '../../common/component/message-panel';
@@ -79,8 +79,8 @@ import {CustomerAccount} from '../service/customer-account-model';
 export class EditCustomerAccount extends ComponentBase {
 
     constructor(
-        @Inject(FormBuilder) public fb: FormBuilder,
-        @Inject(CustomerAccountService) public customerAccountService: CustomerAccountService) {
+        private fb: FormBuilder,
+        private customerAccountService: CustomerAccountService) {
         super();
     }
 

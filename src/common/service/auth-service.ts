@@ -44,6 +44,12 @@ export class AuthService {
         return isValid;
     }
 
+    public navigateTo(location:string)
+    {
+            let injector: Injector = appInjector(); // get the stored reference to the injector
+	        let router: Router = injector.get(Router);
+            router.navigate([location]);
+    }
 
 
     public checkLogin(next: any, previous: any): boolean {
@@ -51,9 +57,12 @@ export class AuthService {
         let isValid: boolean = this.isTokenValid();
         
         if (!isValid) {
-            let injector: Injector = appInjector(); // get the stored reference to the injector
-	        let router: Router = injector.get(Router);
-            router.navigate(['/Login']);
+            this.navigateTo('/Login');
+            
+            
+            //let injector: Injector = appInjector(); // get the stored reference to the injector
+	        //let router: Router = injector.get(Router);
+            //router.navigate(['/Login']);
         }
 
         return isValid;

@@ -1,18 +1,18 @@
-﻿import {Http, RequestOptions, RequestMethod, Request, Headers} from '@angular/http';
-import {Inject} from '@angular/core';
+﻿import {Injectable} from '@angular/core';
+import {Http, RequestOptions, RequestMethod, Request, Headers} from '@angular/http';
 import {StateVariables} from './state-variables';
 
-
+@Injectable()
 export class HttpHelper {
 
-    constructor( @Inject(Http) public http: Http) {
+    constructor( private http: Http) {
         
     }
 
 
     makeHttpCall(url:string, body:string, method: string, useAuth: boolean = true) { 
 
-        let appPath = location.pathname.split('/')[1];
+        //let appPath = location.pathname.split('/')[1];
 
         let header = new Headers({
             'Content-Type': 'application/json'

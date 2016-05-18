@@ -1,5 +1,5 @@
 
-import {Component,Inject,OnInit} from '@angular/core'
+import {Component,OnInit} from '@angular/core'
 import {ControlGroup, FormBuilder, Validators, AbstractControl, FORM_DIRECTIVES} from '@angular/common';
 import {ControlMessages} from '../../common/component/control-messages-component';
 import {MessagePanel} from '../../common/component/message-panel';
@@ -8,7 +8,7 @@ import {ComponentBase} from '../../common/component/component-base';
 import {LoginService} from '../service/login-service';
 import {AuthService} from '../../common/service/auth-service';
 
-
+import {appInjector} from '../../common/service/app-injector';
 
 @Component({
     directives: [ControlMessages, FORM_DIRECTIVES,  MessagePanel],
@@ -50,9 +50,9 @@ import {AuthService} from '../../common/service/auth-service';
 
 export class LoginComponent extends ComponentBase implements OnInit {
     constructor(
-    @Inject(FormBuilder) public fb: FormBuilder,
-    @Inject(AuthService) public authService: AuthService,
-    @Inject(LoginService) public loginService: LoginService) 
+    private fb: FormBuilder,
+    private authService: AuthService,
+    private loginService: LoginService) 
     { 
         super();
     }
@@ -70,9 +70,15 @@ export class LoginComponent extends ComponentBase implements OnInit {
         this.buildForm();
         if(this.authService.isTokenValid())
         {
-            this.alertType = "info";
-            this.alertMessage = "Successfully logged in";
+            //navigate to admin page immediated
+            
+            this.authService.navigateTo('/Admin/AdminHome');
+            
+            //this.alertType = "info";
+            //this.alertMessage = "Successfully logged in";
         }
+        
+        
     }
     
     buildForm() {
@@ -106,8 +112,9 @@ export class LoginComponent extends ComponentBase implements OnInit {
                 localStorage.setItem('id_token',mp.token);
                 this.waiting = false;
                 
-                 this.alertType = "info";
-                 this.alertMessage = "Successfully logged in";
+                this.authService.navigateTo('/Admin');
+                 //this.alertType = "info";
+                 //this.alertMessage = "Successfully logged in";
                 
                 
             },

@@ -1,15 +1,13 @@
 ﻿
-
+import {Injectable} from '@angular/core';
 import {Response} from '@angular/http';
 import {HttpHelper} from '../../common/service/http-helper';
-import {Inject} from '@angular/core';
-
 import {UserApplication} from './user-application-model';
 
-
+@Injectable()
 export class UserService {
 
-    constructor( @Inject(HttpHelper) public httpHelper: HttpHelper) {
+    constructor( private httpHelper: HttpHelper) {
         
     }
     

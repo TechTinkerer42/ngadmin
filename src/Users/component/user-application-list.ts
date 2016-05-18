@@ -1,4 +1,4 @@
-﻿import {Component, Inject,ReflectiveInjector } from '@angular/core'
+﻿import {Component, ReflectiveInjector } from '@angular/core'
 import {AgGridNg2} from 'ag-grid-ng2/main';
 import {GridOptions} from 'ag-grid/main';
 
@@ -54,7 +54,7 @@ export class UserApplicationList extends ComponentBase  {
     userApplications: UserApplication[];
     
 
-    constructor( @Inject(UserService) public userService: UserService) {
+    constructor( private userService: UserService) {
         
         super();
         

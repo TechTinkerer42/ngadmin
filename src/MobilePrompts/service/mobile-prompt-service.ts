@@ -1,14 +1,14 @@
 ﻿
 
 import {HttpHelper} from '../../common/service/http-helper';
-import {Inject, Injectable} from '@angular/core';
+import {Injectable} from '@angular/core';
 import {MobilePrompt} from './mobile-prompt-model';
 
 
 @Injectable()
 export class MobilePromptService {
     
-    constructor( @Inject(HttpHelper) public httpHelper: HttpHelper) {
+    constructor( private httpHelper: HttpHelper) {
     }
 
     

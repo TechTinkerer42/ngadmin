@@ -1,5 +1,5 @@
 ﻿
-import {Component, Inject, EventEmitter, ElementRef, OnInit} from '@angular/core'
+import {Component, EventEmitter, ElementRef, OnInit} from '@angular/core'
 import {Observable} from 'rxjs/Rx';
 
 
@@ -24,7 +24,7 @@ export class SearchComponent implements OnInit {
 
     showClearButton: boolean = false;
 
-    constructor( @Inject(ElementRef) private el: ElementRef) {
+    constructor( private el: ElementRef) {
         
     }
 

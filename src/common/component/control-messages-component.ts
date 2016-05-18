@@ -1,4 +1,4 @@
-﻿import {Component, Host,Inject} from '@angular/core'
+﻿import {Component, Host} from '@angular/core'
 import {NgFormModel} from '@angular/common';
 import {ValidationService} from '../service/validation-service';
 
@@ -10,7 +10,7 @@ import {ValidationService} from '../service/validation-service';
 export class ControlMessages {
     controlName: string;
     groupName: string;
-    constructor( @Host() @Inject(NgFormModel) private _formDir: NgFormModel) { }
+    constructor( @Host() private _formDir: NgFormModel) { }
 
     get errorMessage() {
         let c:any;

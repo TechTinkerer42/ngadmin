@@ -1,13 +1,13 @@
 ﻿
 
-import {Inject, Injectable} from '@angular/core'
+import {Injectable} from '@angular/core'
 import {Observable} from 'rxjs/Observable'
 import {HttpHelper} from './http-helper';
 
 @Injectable()
 export class CommonService {
 
-    constructor( @Inject(HttpHelper) public httpHelper: HttpHelper) {
+    constructor( private httpHelper: HttpHelper) {
         
 
 

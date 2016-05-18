@@ -1,4 +1,4 @@
-﻿import {Component, Inject,ReflectiveInjector} from '@angular/core'
+﻿import {Component, ReflectiveInjector} from '@angular/core'
 import {GeocoderService} from '../service/geocoder-service'; 
 import {StoreLocation} from '../service/geocoder-model';
 import {Observable} from 'rxjs/Observable'; 
@@ -85,8 +85,8 @@ import {ComponentBase} from '../../common/component/component-base';
 export class Geocoder extends ComponentBase {
 
     constructor(
-        @Inject(GeocoderService) public geocoderService: GeocoderService,
-        @Inject(GoogleGeocoder) public googleGeocoderService: GoogleGeocoder) {
+        private geocoderService: GeocoderService,
+        private googleGeocoderService: GoogleGeocoder) {
 
         super();
     }

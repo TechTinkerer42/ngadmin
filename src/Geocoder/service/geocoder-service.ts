@@ -1,12 +1,12 @@
 ﻿
 import {HttpHelper} from '../../common/service/http-helper';
-import {Inject, Injectable} from '@angular/core'
+import {Injectable} from '@angular/core'
 
 
 @Injectable()
 export class GeocoderService {
     
-    constructor( @Inject(HttpHelper) public httpHelper: HttpHelper) {
+    constructor( private httpHelper: HttpHelper) {
     }
 
     getLocationsForGeocoding(geocodeType: number, appNumber: number, customerNumber: number, businessLine: number) {

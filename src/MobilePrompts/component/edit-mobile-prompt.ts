@@ -1,4 +1,4 @@
-﻿import {Component, Inject, EventEmitter, Input} from '@angular/core'
+﻿import {Component, EventEmitter, Input} from '@angular/core'
 import {ControlGroup, FormBuilder, Validators, AbstractControl, FORM_DIRECTIVES} from '@angular/common';
 import {ControlMessages} from '../../common/component/control-messages-component';
 import {MessagePanel} from '../../common/component/message-panel';
@@ -119,8 +119,8 @@ import {MobilePrompt} from '../service/mobile-prompt-model';
 export class EditMobilePrompt extends ComponentBase {
 
     constructor(
-        @Inject(FormBuilder) public fb: FormBuilder,
-        @Inject(MobilePromptService) public mobilePromptService: MobilePromptService) {
+        private fb: FormBuilder,
+        private mobilePromptService: MobilePromptService) {
         super();
     }
 

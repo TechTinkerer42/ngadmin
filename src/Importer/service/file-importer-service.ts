@@ -2,13 +2,13 @@
 
 //import {Http, Response, RequestOptions, Request, Headers} from '@angular/http';
 import {HttpHelper} from '../../common/service/http-helper';
-import {Inject, Injectable} from '@angular/core'
+import {Injectable} from '@angular/core'
 import {StateVariables} from '../../common/service/state-variables';
 
 @Injectable()
 export class FileImporterService {
     
-    constructor( @Inject(HttpHelper) public httpHelper: HttpHelper) {
+    constructor( private httpHelper: HttpHelper) {
     }
     
     getFileUploadColumns(tableChoice: string) {

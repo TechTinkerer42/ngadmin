@@ -1,4 +1,4 @@
-﻿import {Component, Inject, ReflectiveInjector} from '@angular/core'
+﻿import {Component, ReflectiveInjector} from '@angular/core'
 import {AgGridNg2} from 'ag-grid-ng2/main';
 import {GridOptions} from 'ag-grid/main';
 import {SearchComponent} from '../../common/component/searcher';
@@ -71,7 +71,7 @@ export class CustomerAccountList extends ComponentBase {
 
     showConfirmOption: boolean = false;
 
-    constructor( @Inject(CustomerAccountService) public customerAccountService: CustomerAccountService) {
+    constructor( private customerAccountService: CustomerAccountService) {
 
         super();
 

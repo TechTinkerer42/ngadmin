@@ -1,4 +1,4 @@
-﻿import {Component, ReflectiveInjector, OnInit} from '@angular/core'
+﻿import {Component, ReflectiveInjector, OnInit, TemplateRef} from '@angular/core'
 import {MobilePromptService} from '../service/mobile-prompt-service';
 import {MobilePrompt} from '../service/mobile-prompt-model';
 import {ApplicationChooser} from '../../common/component/app-chooser'
@@ -17,7 +17,7 @@ import {InputText, DataTable, Column, Header, Footer, Button, MenuItem, ContextM
     
     <div *ngIf="showLoading"><i class='fa fa-spinner fa-spin'></i> Loading ...</div>
    
-    <app-chooser [selectedApp]="selectedApp" (onAppChosen)="onAppChosen($event)">Loading...</app-chooser>   
+    <app-chooser [selectedApp]="selectedApp" (onAppChosen)="onAppChosen($event,dt)">Loading...</app-chooser>   
     <br>
     <p-contextMenu #cm [model]="contextMenuItems"></p-contextMenu>
     
@@ -26,22 +26,10 @@ import {InputText, DataTable, Column, Header, Footer, Button, MenuItem, ContextM
     
     <header><span style="float:left">Header</span><span style="float:right">{{dt.totalRecords}} records</span></header>
     
-    <p-column field="promptID" [sortable]="true" header="Id"></p-column>
-    <p-column field="key" [sortable]="true" header="Key"></p-column>
-    <p-column field="translation" [sortable]="true" header="Translation"></p-column>
-    <p-column field="AppNum" [sortable]="true" header="App #"></p-column>
-    <p-column field="language" [sortable]="true" header="Language">
-        <template let-col let-prompt="rowData">{{translateLanguage(prompt[col.field])}}</template>
+    <p-column *ngFor="let col of cols" [sortable]="col.sortable" [field]="col.field" [header]="col.header">
+        <template let-col let-prompt="rowData">{{translate(col.field,prompt[col.field])}}</template>
     </p-column>
-    <p-column field="promptBehaviorType" [sortable]="true" header="Behavior Type">
-        <template let-col let-prompt="rowData">{{translateBehavior(prompt[col.field])}}</template>
-    </p-column>
-    <p-column field="promptType" [sortable]="true" header="Prompt Type">
-        <template let-col let-prompt="rowData">{{translateType(prompt[col.field])}}</template>
-    </p-column>
-    <p-column field="HasChild" [sortable]="true" header="Has Child"></p-column>
-    <p-column field="Parent" [sortable]="true" header="Parent"></p-column>
-    <p-column field="Value" [sortable]="true" header="Value"></p-column>
+    
     </p-dataTable>
     
     <div class="ui-widget-header ui-helper-clearfix" style="padding:4px 10px;border-bottom: 0 none">
@@ -66,6 +54,9 @@ import {InputText, DataTable, Column, Header, Footer, Button, MenuItem, ContextM
 
 export class MobilePromptList extends ComponentBase implements OnInit {
 
+
+
+
     mobilePrompts: MobilePrompt[];
     selectedApp: number = 15; //initial value
     selectedPrompt: MobilePrompt;
@@ -75,6 +66,29 @@ export class MobilePromptList extends ComponentBase implements OnInit {
     showConfirmOption: boolean = false;
     contextMenuItems: MenuItem[];
     showModal: boolean = false;
+    cols: any[];
+
+
+    buildColumns() {
+
+
+
+
+
+        this.cols = [
+            { field: 'promptID', header: 'Id', sortable: true },
+            { field: 'key', header: 'Key', sortable: true },
+            { field: 'translation', header: 'Translation', sortable: true },
+            { field: 'AppNum', header: 'App #', sortable: true },
+            { field: 'language', header: 'Language', sortable: true },
+            { field: 'promptBehaviorType', header: 'Behavior Type', sortable: true },
+            { field: 'promptType', header: 'Type', sortable: true },
+            { field: 'HasChild', header: 'Has Child', sortable: true },
+            { field: 'Parent', header: 'Parent', sortable: true },
+            { field: 'Value', header: 'Value', sortable: true }
+        ];
+
+    }
 
 
     ngOnInit() {
@@ -84,7 +98,10 @@ export class MobilePromptList extends ComponentBase implements OnInit {
             { label: 'Delete', icon: 'fa-close', command: (event) => this.deleteMobilePrompt() }
         ];
 
+        this.buildColumns();
+
         this.getMobilePrompts(this.selectedApp);
+
     }
 
     constructor(private mobilePromptService: MobilePromptService) {
@@ -93,8 +110,10 @@ export class MobilePromptList extends ComponentBase implements OnInit {
 
 
 
-    onAppChosen(appNumber: number) {
+    onAppChosen(appNumber: number, dt: DataTable) {
+        dt.reset();
         this.selectedApp = appNumber;
+        //this.buildColumns();
         this.getMobilePrompts(appNumber); //initial data load
     }
 
@@ -181,53 +200,44 @@ export class MobilePromptList extends ComponentBase implements OnInit {
             );
     }
 
-    translateLanguage(language: number): string {
-        let temp = language;
+    translate(col: string, input: any): string {
 
-        switch (temp) {
-            case 1:
-                return 'English';
+        switch (col) {
+            case "language":
+                switch (input) {
+                    case 1:
+                        return 'English';
+                    case 2:
+                        return 'Spanish';
+                }
 
-            case 2:
-                return 'Spanish';
-
+                break;
+            case "promptBehaviorType":
+                switch (input) {
+                    case 0:
+                        return 'Regular';
+                    case 1:
+                        return 'Confirmation';
+                }
+                break;
+            case "promptType":
+                switch (input) {
+                    case 1:
+                        return 'Regular';
+                    case 2:
+                        return 'Yes/No';
+                }
+                break;
             default:
-                return language.toString();
+                return input;
         }
+
+
+
 
     }
 
-    translateBehavior(behavior: number): string {
-        let temp = behavior;
-
-        switch (temp) {
-            case 0:
-                return 'Regular';
-
-            case 1:
-                return 'Confirmation';
-
-            default:
-                return behavior.toString();
-        }
-
-    }
-
-    translateType(type: number): string {
-        let temp = type;
-
-        switch (temp) {
-            case 1:
-                return 'Regular';
-
-            case 2:
-                return 'Yes/No';
-
-            default:
-                return type.toString();
-        }
-
-    }
+  
 
 
 

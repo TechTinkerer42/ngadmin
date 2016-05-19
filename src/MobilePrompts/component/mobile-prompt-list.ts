@@ -1,295 +1,240 @@
-﻿import {Component, ReflectiveInjector} from '@angular/core'
-import {AgGridNg2} from 'ag-grid-ng2/main';
-import {GridOptions} from 'ag-grid/main';
-import {SearchComponent} from '../../common/component/searcher';
+﻿import {Component, ReflectiveInjector, OnInit} from '@angular/core'
 import {MobilePromptService} from '../service/mobile-prompt-service';
 import {MobilePrompt} from '../service/mobile-prompt-model';
-
 import {ApplicationChooser} from '../../common/component/app-chooser'
-import {MODAL_DIRECTIVES} from 'ng2-bs3-modal/ng2-bs3-modal';
 import {EditMobilePrompt} from './edit-mobile-prompt';
 import {AuthService} from '../../common/service/auth-service';
 import {ComponentBase} from '../../common/component/component-base';
 
 import {CanActivate} from '@angular/router-deprecated';
-
-
+import {InputText, DataTable, Column, Header, Footer, Button, MenuItem, ContextMenu, Dialog, Growl, Message} from 'primeng/primeng';
 
 @Component({
-    directives: [AgGridNg2, SearchComponent,  ApplicationChooser, MODAL_DIRECTIVES, EditMobilePrompt],
+    directives: [ApplicationChooser, EditMobilePrompt, DataTable, Column, Header, Footer, Button, ContextMenu, Dialog, Growl],
     providers: [MobilePromptService],
     template: `
+    <p-growl [value]="messages"></p-growl>
     
-    <modal #modal size="lg" keyboard="false" [animation]="false">
-        <modal-header [show-close]="false">
-            <h4 style="float:left" class="modal-title">{{action}} Prompt</h4>
-            <a style="float:right" *ngIf="PromptModel.promptID != -1 && !showConfirmOption" class="btn btn-primary" (click)="showConfirmOption=true;">Delete Prompt</a>
-            <div *ngIf="showConfirmOption" style="float:right">
-                <a class="btn btn-success" (click)="modal.close();deleteMobilePrompt(PromptModel.promptID)">Delete It</a>
-                <a class="btn btn-default" (click)="showConfirmOption=false">Keep It</a> 
-            </div>
-
-        </modal-header>
-        <modal-body>
-            <edit-mobile-prompt [IncomingModel]="PromptModel" (onCancel)="modal.close();" (onDoneEdit)="onDoneEdit(modal,$event);" (onDoneAdd)="onDoneAdd(modal,$event);"></edit-mobile-prompt>
-        </modal-body>
-    </modal>
-
-
-    <div class="row">
-        <div class="col-md-4">                                                                                                          
-            <div class="form-group">
-                <app-chooser [selectedApp]="selectedApp" (onAppChosen)="onAppChosen($event)">Loading...</app-chooser>                
-            </div>
-        </div>
-        <div class="col-md-3 col-md-offset-4">
-            <button type="button" class="btn btn-primary" (click)="openModal(modal,'Add');">Add Prompt</button>
-        </div>
+    <div *ngIf="showLoading"><i class='fa fa-spinner fa-spin'></i> Loading ...</div>
+   
+    <app-chooser [selectedApp]="selectedApp" (onAppChosen)="onAppChosen($event)">Loading...</app-chooser>   
+    <br>
+    <p-contextMenu #cm [model]="contextMenuItems"></p-contextMenu>
+    
+    <p-dataTable #dt [value]="mobilePrompts" selectionMode="single" [paginator]="true" [rows]="20" filterDelay="500" [contextMenu]="cm" 
+    [responsive]="true" [globalFilter]="gb" resizableColumns="true" columnResizeMode="expand" [(selection)]="selectedPrompt">
+    
+    <header><span style="float:left">Header</span><span style="float:right">{{dt.totalRecords}} records</span></header>
+    
+    <p-column field="promptID" [sortable]="true" header="Id"></p-column>
+    <p-column field="key" [sortable]="true" header="Key"></p-column>
+    <p-column field="translation" [sortable]="true" header="Translation"></p-column>
+    <p-column field="AppNum" [sortable]="true" header="App #"></p-column>
+    <p-column field="language" [sortable]="true" header="Language">
+        <template let-col let-prompt="rowData">{{translateLanguage(prompt[col.field])}}</template>
+    </p-column>
+    <p-column field="promptBehaviorType" [sortable]="true" header="Behavior Type">
+        <template let-col let-prompt="rowData">{{translateBehavior(prompt[col.field])}}</template>
+    </p-column>
+    <p-column field="promptType" [sortable]="true" header="Prompt Type">
+        <template let-col let-prompt="rowData">{{translateType(prompt[col.field])}}</template>
+    </p-column>
+    <p-column field="HasChild" [sortable]="true" header="Has Child"></p-column>
+    <p-column field="Parent" [sortable]="true" header="Parent"></p-column>
+    <p-column field="Value" [sortable]="true" header="Value"></p-column>
+    </p-dataTable>
+    
+    <div class="ui-widget-header ui-helper-clearfix" style="padding:4px 10px;border-bottom: 0 none">
+        <i class="fa fa-search" style="float:left;margin:4px 4px 0 0"></i>
+        <input #gb type="text" pInputText size="50" style="float:left" placeholder="Enter Search">
+        <button type="button" pButton icon="fa-plus" style="float:right" (click)="addPrompt();" label="Add Prompt"></button>
     </div>
-    <div class="row">
-        <div class="col-md-12">
-            <ag-grid-ng2 #agGrid style="height: 400px;" class="ag-blue" (rowDoubleClicked)="onRowDoubleClicked(modal)" [gridOptions]="gridOptions"></ag-grid-ng2>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-2">
-            <searcher (onSearchTermEntered) = "onSearchTermEntered($event)"></searcher>
-        </div>
-        <div class="col-md-2 col-md-offset-6">    
-            Rows: {{rowsDisplayed}}
-        </div>
-    </div>
+    
+    <p-dialog [resizable]="false" [height]="800" [contentHeight]="750" [width]="800" [closeOnEscape]="false" [closable]="false" [draggable]="true" [(visible)]="showModal" modal="modal" [showEffect]="fade">
+    <edit-mobile-prompt [IncomingModel]="PromptModel" (onCancel)="showModal=false;" (onDoneEdit)="onDoneEdit($event);" (onDoneAdd)="onDoneAdd($event);"></edit-mobile-prompt>
+    </p-dialog>
     `
 })
-    
+
 @CanActivate((next, previous) => {
     let injector: any = ReflectiveInjector.resolveAndCreate([AuthService]);
     let authService: AuthService = injector.get(AuthService);
     return authService.checkLogin(next, previous);
-})  
+})
 
 
 
-export class MobilePromptList extends ComponentBase {
-    columnDefs: [{}];
-    gridOptions: GridOptions = [];
-    searchTerm: string = "";
-    rowsDisplayed: string;
+export class MobilePromptList extends ComponentBase implements OnInit {
+
     mobilePrompts: MobilePrompt[];
     selectedApp: number = 15; //initial value
-    
-    action: string;
-
+    selectedPrompt: MobilePrompt;
+    totalTableRows: number = 0;
+    showLoading: boolean = false;
     PromptModel: MobilePrompt = new MobilePrompt();
-
     showConfirmOption: boolean = false;
+    contextMenuItems: MenuItem[];
+    showModal: boolean = false;
 
-    constructor( private mobilePromptService: MobilePromptService) { 
-        
-        super();
-        this.columnDefs = [
-            { headerName: "ID", field: "promptID", width: 75 },
-            { headerName: "Key", field: "key"},
-            { headerName: "Translation", field: "translation"},
-            { headerName: "App #", field: "AppNum", width: 75},
-            { headerName: "Language", field: "language", width: 95, valueGetter: this.languageValueGetter},
-            { headerName: "Behavior Type", field: "promptBehaviorType", width: 120, valueGetter: this.behaviorValueGetter },
-            { headerName: "Prompt Type", field: "promptType", width: 120, valueGetter: this.typeValueGetter},
-            { headerName: "Child", field: "HasChild", width: 75 },
-            { headerName: "Parent", field: "Parent", width: 75},
-            { headerName: "Value", field: "Value", width: 75 }
+
+    ngOnInit() {
+
+        this.contextMenuItems = [
+            { label: 'Edit', icon: 'fa-search', command: (event) => this.editPrompt() },
+            { label: 'Delete', icon: 'fa-close', command: (event) => this.deleteMobilePrompt() }
         ];
 
-        this.gridOptions = {
-            columnDefs: this.columnDefs,
-            enableColResize: true,
-            rowHeight : 50,
-            enableSorting: true,
-            rowSelection: 'single',
-            enableFilter: true,
-            overlayNoRowsTemplate: "<span style='padding: 10px; border: 1px solid #444; background: lightgoldenrodyellow;'>No results</span>",
-            overlayLoadingTemplate: "<span style='padding: 10px; border: 1px solid #444; background: lightgoldenrodyellow;'><i class='fa fa-spinner fa-spin'></i> Loading...</span>",
-        }   
-        
         this.getMobilePrompts(this.selectedApp);
     }
 
-    openModal(modal:any, action:string) {
-        this.action = action;
-        if (action === 'Add') {
-            
-            this.PromptModel = new MobilePrompt();
-            this.PromptModel.AppNum = this.selectedApp;
-
-            this.gridOptions.api.deselectAll();
-        }
-        
-        modal.open();
+    constructor(private mobilePromptService: MobilePromptService) {
+        super();
     }
 
-    onDoneAdd(modal:any,addedRow:MobilePrompt) {
 
-        modal.close();
 
-        this.mobilePrompts.push(addedRow);
-
-        if (this.gridOptions.api) {
-            this.gridOptions.api.setRowData(this.mobilePrompts);
-            this.showRowMessage();
-        }
-    }
-
-    onDoneEdit(modal:any,changedRow:MobilePrompt) {
-        
-        modal.close();
-
-        var foundPrompt = this.mobilePrompts.filter(x => x.promptID == changedRow.promptID);
-
-        if (foundPrompt[0]) {
-
-            this.mobilePrompts[this.mobilePrompts.indexOf(foundPrompt[0])] = changedRow;
-        }
-        
-
-        if (this.gridOptions.api) {
-            this.gridOptions.api.setRowData(this.mobilePrompts);
-        }
-    }
-
-    onAppChosen(appNumber:number) {
+    onAppChosen(appNumber: number) {
         this.selectedApp = appNumber;
         this.getMobilePrompts(appNumber); //initial data load
     }
 
-   
+    addPrompt() {
 
-    deleteMobilePrompt(promptID:number) {
-        //console.log(promptID);
-        this.mobilePromptService.deleteMobilePrompt(promptID)
-            .subscribe(
-            mp => {
+        this.PromptModel = new MobilePrompt();
+        this.PromptModel.AppNum = this.selectedApp;
+        this.showModal = true;
+    }
 
-                this.mobilePrompts = this.mobilePrompts.filter(x => x.promptID != promptID);
+    onDoneAdd(addedRow: MobilePrompt) {
 
-                if (this.gridOptions.api) {
-                    this.gridOptions.api.setRowData(this.mobilePrompts);
-                    this.gridOptions.api.sizeColumnsToFit();
-                    this.showRowMessage();
-                }
-            },
-            err => {
+        this.mobilePrompts.push(addedRow);
+        this.showModal = false;
+    }
 
-                console.log(err);
-                this.gridOptions.api.hideOverlay();
-                alert("Error deleting mobile prompt");
+    deleteMobilePrompt() {
+        if (this.selectedPrompt) {
+
+            var conf = confirm('Are you sure?');
+
+            if (conf) {
+                let promptID = this.selectedPrompt.promptID;
+                this.mobilePromptService.deleteMobilePrompt(promptID)
+                    .subscribe(
+                    mp => {
+                        this.mobilePrompts = this.mobilePrompts.filter(x => x.promptID != promptID);
+                        this.showGrowl('Prompt deleted', 'info', '');
+                    },
+                    err => {
+                        console.log(err);
+                        alert("Error deleting mobile prompt");
+                    }
+                    );
             }
-            );
+        }
     }
 
     clonePrompt(p: MobilePrompt): MobilePrompt {
-        let newPrompt = new MobilePrompt();
+        let newPrompt: MobilePrompt = new MobilePrompt();
         for (let prop in p) {
             newPrompt[prop] = p[prop];
         }
         return newPrompt;
     }
-  
 
-    onRowDoubleClicked(modal:any) {
-        let selectedRowsExist = this.gridOptions.api.getSelectedRows();
-        if (selectedRowsExist) {
-            this.PromptModel = this.clonePrompt(selectedRowsExist[0]);
-            this.openModal(modal, 'Edit');
-        }
-    }
-    
-    showRowMessage() {
-        var model = this.gridOptions.api.getModel();
-        var processedRows = model.getRowCount();
-        this.rowsDisplayed = `${processedRows} of ${this.mobilePrompts.length}`;
 
-        this.gridOptions.api.hideOverlay();
-        if (processedRows < 1) {
-            this.gridOptions.api.showNoRowsOverlay();
+
+    editPrompt() {
+        if (this.selectedPrompt) {
+            this.PromptModel = null;
+            this.PromptModel = this.clonePrompt(this.selectedPrompt);
+            this.showModal = true;
         }
     }
 
-    onSearchTermEntered(filterValue:string) {
-        this.gridOptions.api.deselectAll();
-        this.gridOptions.api.setQuickFilter(filterValue);
-        this.showRowMessage();
-        this.PromptModel = new MobilePrompt();
+    onDoneEdit(changedRow: MobilePrompt) {
+
+        this.showModal = false;
+
+        var foundPrompt = this.mobilePrompts.filter(x => x.promptID == changedRow.promptID);
+
+        if (foundPrompt[0]) {
+            this.mobilePrompts[this.mobilePrompts.indexOf(foundPrompt[0])] = changedRow;
+        }
     }
-    
+
     getMobilePrompts(appNumber: Number) {
-        if (this.gridOptions.api) {
-            this.gridOptions.api.showLoadingOverlay();
-        }
+
+        this.showLoading = true;
 
         this.mobilePromptService.getMobilePrompts(appNumber)
-            .subscribe(
-            mp => {
-                this.mobilePrompts = mp.json();
-                
-                if (this.gridOptions.api) {
-                    this.gridOptions.api.setRowData(this.mobilePrompts);
-                    this.gridOptions.api.sizeColumnsToFit();
-                    this.showRowMessage();
-                }
+            .map(res => <MobilePrompt[]>res.json())
+            .subscribe(mp => {
+                this.mobilePrompts = mp;
+                this.totalTableRows = this.mobilePrompts.length;
+                this.showLoading = false;
+
             },
             err => {
-                this.gridOptions.api.hideOverlay();
-                this.showErrors(err,'Error retrieving mobile prompts');
+                this.showLoading = false;
+                this.showErrors(err, 'Error retrieving mobile prompts');
             }
             );
     }
 
-     //grid 
+    translateLanguage(language: number): string {
+        let temp = language;
 
-    languageValueGetter(params:any) {
-        let language = '';
-
-        switch (params.data.language) {
+        switch (temp) {
             case 1:
-                language = 'English';
-                break;
+                return 'English';
+
             case 2:
-                language = 'Spanish';
-                break;
+                return 'Spanish';
+
+            default:
+                return language.toString();
         }
-        return language;
+
     }
 
-    behaviorValueGetter(params:any) {
-        let behavior = '';
+    translateBehavior(behavior: number): string {
+        let temp = behavior;
 
-        switch (params.data.promptBehaviorType) {
+        switch (temp) {
             case 0:
-                behavior = 'Regular';
-                break;
-            case 1:
-                behavior = 'Confirmation';
-                break;
+                return 'Regular';
 
+            case 1:
+                return 'Confirmation';
+
+            default:
+                return behavior.toString();
         }
-        return behavior;
+
     }
 
-    typeValueGetter(params:any) {
-        let type = '';
+    translateType(type: number): string {
+        let temp = type;
 
-        switch (params.data.promptType) {
+        switch (temp) {
             case 1:
-                type = 'Regular';
-                break;
+                return 'Regular';
+
             case 2:
-                type = 'Yes/No';
-                break;
+                return 'Yes/No';
+
+            default:
+                return type.toString();
         }
-        return type;
+
     }
-   
+
+
+
+
+
+
+
 }
 
 

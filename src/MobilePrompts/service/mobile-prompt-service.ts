@@ -12,7 +12,13 @@ export class MobilePromptService {
     }
 
     
+   
+    
+   
+    
+    
     getMobilePrompts(appNumber: Number) {
+        
         return this.httpHelper.makeHttpCall('AngularAdmin/GetMobilePrompts', JSON.stringify({ appNumber: appNumber }), 'POST');
     }
     

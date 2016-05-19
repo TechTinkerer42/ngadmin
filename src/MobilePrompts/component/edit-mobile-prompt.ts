@@ -7,12 +7,12 @@ import {ComponentBase} from '../../common/component/component-base';
 import {MobilePromptService} from '../service/mobile-prompt-service';
 import {ApplicationChooser} from '../../common/component/app-chooser'
 import {LanguageChooser} from '../../common/component/language-chooser'
-import {MobilePrompt} from '../service/mobile-prompt-model';  
+import {MobilePrompt} from '../service/mobile-prompt-model';
 
 
 @Component({
     selector: "edit-mobile-prompt",
-    outputs: ['onCancel','onDoneAdd','onDoneEdit'],
+    outputs: ['onCancel', 'onDoneAdd', 'onDoneEdit'],
     directives: [ControlMessages, FORM_DIRECTIVES, ApplicationChooser, LanguageChooser, MessagePanel],
     template: `
     <div class="container-fluid">
@@ -31,7 +31,7 @@ import {MobilePrompt} from '../service/mobile-prompt-model';
                         <div><label for="key">Audio Key:</label></div>
                         <div ngClass="{{errorClassToUse(mobilePromptForm,'key')}}">
                             <div class="input-group">
-                                <input class="form-control" [ngFormControl]="key" [(ngModel)]="PromptModel.key" />
+                                <input class="form-control" [ngFormControl]="key" [(ngModel)]="PromptModel.key"/>
                                 <span class="input-group-btn">
                                 <a class="btn btn-default" (click)="showKeyPicker()">Choose</a>
                                 </span>
@@ -74,7 +74,7 @@ import {MobilePrompt} from '../service/mobile-prompt-model';
                     
                     <div class="form-group">
                         <div><label for="HasChild" class="control-label">Has Child:</label></div>
-                        <input type="checkbox" class="form-control" [ngFormControl]="HasChild" [(ngModel)]="PromptModel.HasChild" />
+                        <input type="checkbox" [ngFormControl]="HasChild" [(ngModel)]="PromptModel.HasChild" />
                     </div>
 
                     <div class="form-group">
@@ -122,34 +122,54 @@ export class EditMobilePrompt extends ComponentBase {
         private fb: FormBuilder,
         private mobilePromptService: MobilePromptService) {
         super();
+
+
     }
+
+    clonePrompt(p: MobilePrompt): MobilePrompt {
+        let newPrompt: MobilePrompt = new MobilePrompt();
+        for (let prop in p) {
+            newPrompt[prop] = p[prop];
+        }
+        return newPrompt;
+    }
+
+    
 
     //model
     PromptModel: MobilePrompt;
 
     //properties
     @Input() set IncomingModel(model: MobilePrompt) {
+        
         this.PromptModel = model;
+        
         this.buildForm(); //reset form
+
+
+
+
+
+
     }
-    
+
     //outputs
     onCancel: EventEmitter<any> = new EventEmitter();
     onDoneAdd: EventEmitter<any> = new EventEmitter();
     onDoneEdit: EventEmitter<any> = new EventEmitter();
 
-    
+
     waiting: boolean = false;
     alertMessage: string;
     alertType: string;
 
     //controls
     mobilePromptForm: ControlGroup;
-    key: AbstractControl;  
+    key: AbstractControl;
     translation: AbstractControl;
     language: AbstractControl;
     promptBehaviorType: AbstractControl;
-    promptType: AbstractControl; 
+    promptType: AbstractControl;
     HasChild: AbstractControl;
     Parent: AbstractControl;
     Value: AbstractControl;
@@ -168,33 +188,33 @@ export class EditMobilePrompt extends ComponentBase {
             this.onCancel.emit('')
         }
     }
- 
-    onLanguageChosen(val:number) {
+
+    onLanguageChosen(val: number) {
         this.PromptModel.language = val;
-        this.mobilePromptForm.markAsDirty();    
+        this.mobilePromptForm.markAsDirty();
     }
-    
+
     showKeyPicker() {
         this.getAudioKeysFromConfig();
     }
-   
+
     buildForm() {
-        //console.log('built the form!!');
+        console.log('building form....');
         this.showDiscardOption = false;
         this.alertMessage = '';
         this.keyPickerShowing = false;
 
         this.mobilePromptForm = this.fb.group({
-            'key': ['', ValidationService.RequiredValidator],
-            'translation': ['', ValidationService.RequiredValidator],
-            'promptBehaviorType': ['', Validators.required],
-            'promptType': ['', Validators.required],
-            'HasChild': [''],
-            'Parent': ['', ValidationService.NumberValidator],
-            'Value': ['', ValidationService.NumberValidator],
+            'key': [this.PromptModel.key, ValidationService.RequiredValidator],
+            'translation': [this.PromptModel.translation, ValidationService.RequiredValidator],
+            'promptBehaviorType': [this.PromptModel.promptBehaviorType, Validators.required],
+            'promptType': [this.PromptModel.promptType, Validators.required],
+            'HasChild': [this.PromptModel.HasChild],
+            'Parent': [this.PromptModel.Parent, ValidationService.NumberValidator],
+            'Value': [this.PromptModel.Value, ValidationService.NumberValidator],
 
         });
-        
+
         this.key = this.mobilePromptForm.controls['key'];
         this.translation = this.mobilePromptForm.controls['translation'];
         this.promptBehaviorType = this.mobilePromptForm.controls['promptBehaviorType'];
@@ -202,8 +222,12 @@ export class EditMobilePrompt extends ComponentBase {
         this.HasChild = this.mobilePromptForm.controls['HasChild'];
         this.Parent = this.mobilePromptForm.controls['Parent'];
         this.Value = this.mobilePromptForm.controls['Value'];
+
+
+
+
     }
-    
+
     addEditMobilePrompt() {
 
         this.waiting = true;
@@ -215,7 +239,7 @@ export class EditMobilePrompt extends ComponentBase {
 
                     this.waiting = false;
                     this.onDoneAdd.emit(mp.json());
-                    
+
                 },
                 err => {
                     this.waiting = false;

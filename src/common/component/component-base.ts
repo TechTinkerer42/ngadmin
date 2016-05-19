@@ -1,6 +1,10 @@
 import {ControlGroup} from '@angular/common';
+import {Message} from 'primeng/primeng';
 
 export class ComponentBase {
+    
+    messages: Message[] = [];
+    
     errorClassToUse(form: ControlGroup, inputName:string, isGroup: boolean = false): string {
 
         if (isGroup) {
@@ -20,8 +24,13 @@ export class ComponentBase {
         }
         
         alert(message);;
-        
     }
+    
+    showGrowl(message:string, severity: string, summary: string)
+    {
+        this.messages.push({severity:severity, summary:summary, detail:message});
+    }
+    
 }
 
 

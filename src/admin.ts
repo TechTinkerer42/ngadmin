@@ -16,8 +16,8 @@ import {
     ROUTER_PROVIDERS, 
     ROUTER_PRIMARY_COMPONENT, 
     RouteConfig,
-    ROUTER_BINDINGS
-    
+    ROUTER_BINDINGS,
+    Router
     
      
     
@@ -25,43 +25,17 @@ import {
 } from '@angular/router-deprecated';
 
 
-
+import {TabMenu,MenuItem} from 'primeng/primeng';
 
 @Component({
     selector: 'admin',
-    directives: [ROUTER_DIRECTIVES],
+    directives: [ROUTER_DIRECTIVES,TabMenu],
     providers:[AuthService],
     template: `
-    <div class="row">
-        <div class="col-md-2">
-            <ul id="sample-menu-3" class="sf-menu sf-vertical">
-                <li>
-                    <a [routerLink]="['CustomerAccountList']">Customers</a>
-                </li>
-                <li>
-                    <a [routerLink]="['UserApplicationList']">Users</a>
-                </li>
-                <li>
-                    <a [routerLink]="['MobilePromptList']">Mobile Prompts</a>
-                </li>
-                <li>
-                    <a [routerLink]="['FileImporter']">File Importer</a>
-                </li>
-                <li>
-                    <a [routerLink]="['Geocoder']">Geo-coder</a>
-                </li>
-                <li>
-                    <a (click)="logoffUser();">Log-Off</a>
-                </li>
-                
-                </ul>
-        </div>
-        <div class="col-md-9">
-            <router-outlet></router-outlet>
-        </div>
+    <p-tabMenu [model]="items"></p-tabMenu>
+    <div style="padding-left:10px;">
+    <router-outlet></router-outlet>
     </div>
-    
-    
     `
 })
 
@@ -80,15 +54,25 @@ import {
 
 export class Admin   {
     
+    private items: MenuItem[];
+
+    
     constructor( private router: Router,private authService: AuthService) {
-        
+    this.items = [
+            {label: 'Home', icon: 'fa-file-home',url: ['AdminHome']},
+            {label: 'Customers', icon: 'fa-file-audio-o',url: ['CustomerAccountList']},
+            {label: 'Users', icon: 'fa-users',url: ['UserApplicationList']},
+            {label: 'Mobile Prompts', icon: 'fa-volume-up',url: ['MobilePromptList']},
+            {label: 'File Importer', icon: 'fa-upload',url: ['FileImporter']},
+            {label: 'Geo-coder', icon: 'fa-globe',url: ['Geocoder']},
+            {label: 'Log-off', icon: 'fa-sign-out',command: (event) => {
+                localStorage.removeItem("id_token");
+                this.authService.navigateTo('/Login');
+            }}
+        ];    
     }
     
-    logoffUser(){
-        localStorage.removeItem("id_token");
-        this.authService.navigateTo('/Login');
-        
-    }
+    
     
    
     

@@ -33,7 +33,7 @@ import {TabMenu,MenuItem} from 'primeng/primeng';
     providers:[AuthService],
     template: `
     <p-tabMenu [model]="items"></p-tabMenu>
-    <div style="padding-left:10px;">
+    <div style="padding-left:10px;padding-top:25px;">
     <router-outlet></router-outlet>
     </div>
     `

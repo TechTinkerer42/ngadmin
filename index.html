@@ -1,68 +1,75 @@
 <html>
-  <head>
-    <title>NG Admin!!</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<head>
+  <title>NG Admin!!</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link href="node_modules/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+  <link href="node_modules/ag-grid/dist/styles/ag-grid.css" rel="stylesheet" />
+  <link href="node_modules/ag-grid/dist/styles/theme-blue.css" rel="stylesheet" />
+  <link href="css/bootstrap.css" rel="stylesheet" />
+  <link href="css/superfish.css" rel="stylesheet" async />
+  <link href="css/superfish-vertical.css" rel="stylesheet" async />
+
+  <link rel="stylesheet" type="text/css" href="node_modules/primeui/themes/aristo/theme.css" />
+  <link rel="stylesheet" type="text/css" href="node_modules/primeui/primeui-ng-all.css" />
+
+
+
+
+
+  <!-- Polyfill(s) for older browsers -->
+  <script src="node_modules/zone.js/dist/zone.js"></script>
+  <script src="node_modules/reflect-metadata/Reflect.js"></script>
+
+
+  <script src="thirdparty/papaparse/papaparse.min.js"></script>
+  <script src="node_modules/primeui/primeui-ng-all.min.js"></script>
+  <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=geometry" async></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/js/bootstrap.js"></script>
+  <script src="node_modules/underscore/underscore-min.js"></script>
+
+
+  <style>
+    .ui-datatable-data {
+      font-size: 13px;
+    }
     
-    <link href="node_modules/font-awesome/css/font-awesome.min.css" rel="stylesheet"  />
-    <link href="node_modules/ag-grid/dist/styles/ag-grid.css" rel="stylesheet"  />
-    <link href="node_modules/ag-grid/dist/styles/theme-blue.css" rel="stylesheet"  />
-    <link href="css/bootstrap.css" rel="stylesheet" />
-    <link href="css/superfish.css" rel="stylesheet" async />
-    <link href="css/superfish-vertical.css" rel="stylesheet" async />
-
-    <link rel="stylesheet" type="text/css" href="node_modules/primeui/themes/bootstrap/theme.css" />
-    <link rel="stylesheet" type="text/css" href="node_modules/primeui/primeui-ng-all.css" />
+    .ui-datatable-header {
+      font-size: 15px;
+    }
     
-
+    .ui-column-title {
+      font-size: 13px;
+    }
     
-      
-
-    <!-- Polyfill(s) for older browsers -->
-    <script src="node_modules/zone.js/dist/zone.js"></script>
-    <script src="node_modules/reflect-metadata/Reflect.js"></script>
+    .appchooser{
+      width: 500px;
+      border: 1px solid #7096ab;
+      background: #85b2cb url(images/ui-bg_highlight-hard_80_85b2cb_1x100.png) 50% 50% repeat-x;
+      background: #85b2cb linear-gradient(to bottom, rgba(255,255,255,0.6), rgba(255,255,255,0));
+      background: #85b2cb -webkit-gradient(linear, left top, left bottom, from(rgba(255,255,255,0.6)), to(rgba(255,255,255,0)));
+      background: #85b2cb -moz-linear-gradient(to bottom, rgba(255,255,255,0.6), rgba(255,255,255,0)); /*    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#CCFFFFFF, endColorstr=#00FFFFFF);     -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#CCFFFFFF, endColorstr=#00FFFFFF)"; */
+      font-weight: bold;
+      color: #313131;
+      -moz-box-shadow: 0 0 5px #85b2cb;
+      -webkit-box-shadow: 0px 0px 8px #85b2cb;
+      box-shadow: 0px 0px 8px #85b2cb;
+    }
     
-   
-    <script src="node_modules/primeui/primeui-ng-all.min.js"></script>    
-    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=geometry" async></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/js/bootstrap.js"></script>
+  </style>
+
+</head>
 
 
 
-<style>
-  .ui-datatable-data{
-    font-size: 13px;
-  }
-  .ui-datatable-header{
-    font-size: 15px;
-  }
-  .ui-column-title{
-    font-size: 13px;
-  }
-  
-</style>
-  
+<body>
+  <br>
+  <app><span style="padding-left:10px;"><i class='fa fa-spinner fa-spin'></i> Loading...</span></app>
 
+</body>
 
-    <!--<script src="systemjs.config.js"></script>
-    <script>
-      System.import('app').catch(function(err){ console.error(err);  });
-      
-      window.onbeforeunload = function() {
-        //localStorage.removeItem("id_token");
-      };
-    </script>
-    -->
-  </head>
+<script src="dist/bundle.js"></script>
 
-  
-
-  <body>
-     <br>
-     <app><span style="padding-left:10px;"><i class='fa fa-spinner fa-spin'></i> Loading menu...</span></app>
-     
-  </body>
-  
-   <script src="dist/bundle.js"></script>
-  
 </html>

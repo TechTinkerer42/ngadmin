@@ -8,8 +8,6 @@ import {AuthService} from './common/service/auth-service';
 import {Admin} from './admin';
 import {LoginComponent} from './login/component/login-component';
 import {appInjector} from './common/service/app-injector';
-
-
 import {HTTP_PROVIDERS} from '@angular/http';
 
 import { 

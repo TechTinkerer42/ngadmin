@@ -1,0 +1,7 @@
+"Id","App #","Language","Behavior Type","Key","Type","Translation","Has Child","Parent","Value"
+"1537","15","1","0","40-ChooseService.au","1","Please Choose Service Type:","true",,
+"1538","15","1","0","40-ChooseService.au","1","Plow Without Salt Service","false","1537","1"
+"1540","15","1","0","40-ChooseService.au","1","Plow with Salt Service","false","1537","2"
+"1541","15","1","0","40-ChooseService.au","1","Salt Only Service","false","1537","3"
+"1542","15","1","0","40-ChooseService.au","1","Partial Salt Service","false","1537","4"
+"1543","15","1","0","40-ChooseService.au","1","Hauling Service","false","1537","5"

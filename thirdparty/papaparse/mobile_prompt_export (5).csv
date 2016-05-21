@@ -1,0 +1,16 @@
+"Id","App #","Language","Key","Type","Translation","Has Child","Parent","Value"
+"1532","15","English","39-EnglishOrSpanish.au","Regular","English","false","11136","1"
+"1533","15","English","39-EnglishOrSpanish.au","Regular","Español","false","11136","2"
+"1534","15","English","40-EnterStoreNumberV3.au","Regular","Please Choose your Location:","false",,
+"1536","15","English","39-ReEnterStoreNumber.au","Regular","<span class='error'>Invalid Location Entered</span><br><br>Please Choose your Location:","false",,
+"1537","15","English","40-ChooseService.au","Regular","Please Choose Service Type:","true",,
+"1538","15","English","40-ChooseService.au","Regular","Plow Without Salt Service","false","1537","1"
+"1540","15","English","40-ChooseService.au","Regular","Plow with Salt Service","false","1537","2"
+"1541","15","English","40-ChooseService.au","Regular","Salt Only Service","false","1537","3"
+"1542","15","English","40-ChooseService.au","Regular","Partial Salt Service","false","1537","4"
+"1543","15","English","40-ChooseService.au","Regular","Hauling Service","false","1537","5"
+"1545","15","English","59-ConfirmationClosingB.au","Regular","Thank you,<br><br>Your service has been captured<br><br>You may close your mobile browser","false",,
+"1546","15","English","Correct1Incorrect2.au","Yes/No","Are you sure?","false",,
+"11101","15","English","39-EnterEmployeeID.au","Regular","Please enter your Employee ID","false",,
+"11136","15","English","39-EnglishOrSpanish.au","Regular","Welcome to the SPP Demo!","true",,
+"12159","15","English","sdsd","Regular","sdsd!","true","2","2"

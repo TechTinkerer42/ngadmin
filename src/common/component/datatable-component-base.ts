@@ -49,7 +49,7 @@ export class DataTableComponentBase extends ComponentBase {
         this.exportString = "Export " + rowNumber.toString() + " rows";
     }
 
-    doExport(dt: DataTable, mainDataSource, mainDataColumns, filename: string) {
+    doExport(dt: DataTable, mainDataSource, mainDataColumns, hiddenColumns,filename: string) {
 
         let dataToExport = (<any>dt).filteredValue;
 
@@ -57,11 +57,7 @@ export class DataTableComponentBase extends ComponentBase {
             dataToExport = mainDataSource;
         }
 
-
-        let showingColumns: string[] = dt.visibleColumns().map(a => { return a.header });
-        let showingFields: string[] = dt.visibleColumns().map(a => { return a.field });
-
-        let hiddenColumns: string[] = (<Column[]>mainDataColumns).filter(e => e.hidden == true).map(w => w.field);
+        
 
         let strippedRows: Column[] = _.map(dataToExport, function (row) {
             return _.omit(row, hiddenColumns);

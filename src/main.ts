@@ -40,10 +40,8 @@ import {enableProdMode} from '@angular/core';
     selector: 'app',
     directives: [ROUTER_DIRECTIVES],
     template: `
-    <div class="row">
-        <div class="col-md-9">
-            <router-outlet></router-outlet>
-        </div>
+    <div style="padding-left:5px;padding-top:25px;">
+    <router-outlet></router-outlet>
     </div>
     `
 })

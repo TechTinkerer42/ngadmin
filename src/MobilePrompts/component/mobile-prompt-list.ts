@@ -37,7 +37,7 @@ import {InputText, DataTable, Column, Header, Footer, Button, ContextMenu, Dialo
         </div>
     </div>
     
-    <p-dialog [resizable]="false" [height]="800" [contentHeight]="750" [width]="800" [closeOnEscape]="false" [closable]="false" [draggable]="true" [(visible)]="showModal" modal="modal" [showEffect]="fade">
+    <p-dialog [center]="true" [resizable]="false" [height]="800" [contentHeight]="750" [width]="800" [closeOnEscape]="false" [closable]="false" [draggable]="true" [(visible)]="showModal" modal="modal" [showEffect]="fade">
     <edit-mobile-prompt [IncomingModel]="PromptModel" (onCancel)="showModal=false;" (onDoneEdit)="onDoneEdit($event);" (onDoneAdd)="onDoneAdd($event);"></edit-mobile-prompt>
     </p-dialog>
     `
@@ -107,7 +107,13 @@ export class MobilePromptList extends DataTableComponentBase implements OnInit {
     }
 
     onExport(dt: DataTable) {
-        this.doExport(dt, this.mobilePrompts, this.cols, this.exportFileName);
+        
+        let hiddenColumns: string[] = (<Column[]>this.cols).filter(e => e.hidden == true).map(w => w.field);
+        hiddenColumns.push("language");
+        hiddenColumns.push("promptType");
+        hiddenColumns.push("promptBehaviorType"); //hide the non friendly columns
+        
+        this.doExport(dt, this.mobilePrompts, this.cols, hiddenColumns,this.exportFileName);
     }
 
     onAppChosen(appNumber: number, dt: DataTable) {

@@ -1,0 +1,5 @@
+"Id","App #","Language","Behavior Type","Key","Type","Translation","Has Child","Parent","Value"
+"1534","15","English","Regular","40-EnterStoreNumberV3.au","Regular","Please Choose your Location:","false",,
+"1536","15","English","Regular","39-ReEnterStoreNumber.au","Regular","<span class='error'>Invalid Location Entered</span><br><br>Please Choose your Location:","false",,
+"1537","15","English","Regular","40-ChooseService.au","Regular","Please Choose Service Type:","true",,
+"11101","15","English","Regular","39-EnterEmployeeID.au","Regular","Please enter your Employee ID","false",,

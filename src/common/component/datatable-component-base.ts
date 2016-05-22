@@ -3,16 +3,51 @@ import {Message, DataTable, Column,MenuItem} from 'primeng/primeng';
 
 import {ComponentBase} from './component-base';
 
+
+
 export class DataTableComponentBase extends ComponentBase {
 
-    exportString:string = "";
-    cols: any[];
-    contextMenuItems: MenuItem[];
+    ExportString:string = "";
+    ShowExportButton: boolean = false;
+    ContextMenuItems: MenuItem[];
+    ClearFiltersNeeded:boolean = false;
+    GridColumns: any[];
+    GridDataSource:any[];
+    NumberOfGridRows: number = 20;
+    ShowLoading: boolean = false;
+    
+    
+    filterGrid(dt: DataTable) {
+        this.setExportString(this.getExportRowCount(dt));
+        this.ClearFiltersNeeded = true;
+        
+    }
+    
+    getExportRowCount(dt: DataTable): number {
+        
+        let rowCount:number = 0;
+        
+        let filteredData = (<any>dt).filteredValue;
+        if (filteredData != null) {
+            rowCount = filteredData.length;
+        }
+        else {
+            rowCount = (<any>dt).value.length;
+        }
+        
+        return rowCount;
+    }
+    
+    clearFilters(dt: DataTable){
+        dt.reset();
+        this.setExportString(this.getExportRowCount(dt));
+        this.ClearFiltersNeeded = false;
+    }
     
     buildContextColumns() {
-        for (let c in this.cols) {
-            let col: Column = this.cols[c];
-            this.contextMenuItems.push({ label: col.header, icon: 'fa-minus', command: (event) => this.toggleColumn(col.header, 'fa-minus') });
+        for (let c in this.GridColumns) {
+            let col: Column = this.GridColumns[c];
+            this.ContextMenuItems.push({ label: col.header, icon: 'fa-minus', command: (event) => this.toggleColumn(col.header, 'fa-minus') });
         }
     }
     
@@ -25,10 +60,11 @@ export class DataTableComponentBase extends ComponentBase {
     }
     
     toggleColumn(columnName: string, iconName: string) {
-
-        var contextColumn = this.contextMenuItems.filter(x => x.label == columnName)[0];
+        
+        
+        var contextColumn = this.ContextMenuItems.filter(x => x.label == columnName)[0];
         if (contextColumn) {
-            let gridCol = this.cols.filter(x => x.header == columnName)[0];
+            let gridCol = this.GridColumns.filter(x => x.header == columnName)[0];
             if (contextColumn.icon == 'fa-plus') {
                 iconName = "fa-minus";
                 gridCol.hidden = false;
@@ -44,26 +80,27 @@ export class DataTableComponentBase extends ComponentBase {
         }
     }
     
-    setExportString(rowNumber:number)
+    setExportString(rowCount:number)
     {
-        this.exportString = "Export " + rowNumber.toString() + " rows";
+        this.ShowExportButton = false;
+        if(rowCount > 0)
+        {
+            this.ShowExportButton = true;
+            this.ExportString = "Export " + rowCount.toString() + " rows";
+        }
     }
 
-    doExport(dt: DataTable, mainDataSource, mainDataColumns, hiddenColumns,filename: string) {
+    doExport(dt: DataTable, hiddenColumns,filename: string) {
 
         let dataToExport = (<any>dt).filteredValue;
 
         if (dataToExport == null) {
-            dataToExport = mainDataSource;
+            dataToExport = dt.value;
         }
-
-        
 
         let strippedRows: Column[] = _.map(dataToExport, function (row) {
             return _.omit(row, hiddenColumns);
         });
-
-
 
         let config = {
             quotes: true,
@@ -76,14 +113,19 @@ export class DataTableComponentBase extends ComponentBase {
             strippedRows, config
         );
 
-        csv = this.getFirstRowReplacement(csv, mainDataColumns);
+        csv = this.getFirstRowReplacement(csv, this.GridColumns);
 
         var csvData = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         var csvURL = window.URL.createObjectURL(csvData);
+        
         var tempLink = document.createElement('a');
         tempLink.href = csvURL;
         tempLink.setAttribute('download', filename);
-        tempLink.click();
+        
+        setTimeout(() => tempLink.click(),500); //settimeout prevents double linking
+        
+        
+        
     }
 
     private getFirstRowReplacement(csv: string, cols: Column[]) {

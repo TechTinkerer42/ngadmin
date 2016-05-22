@@ -10,21 +10,21 @@ import {CanActivate} from '@angular/router-deprecated';
 import {InputText, DataTable, Column, Header, Footer, Button, ContextMenu, Dialog, Growl, Message} from 'primeng/primeng';
 
 @Component({
-    directives: [ApplicationChooser, EditMobilePrompt, DataTable, Column, Header, Footer, Button, ContextMenu, Dialog, Growl,Loading],
+    directives: [ApplicationChooser, EditMobilePrompt, DataTable, Column, Header, Footer, Button, ContextMenu, Dialog, Growl, Loading],
     providers: [MobilePromptService],
     template: `
     <p-growl [value]="messages"></p-growl>
     
-    <loading message="Loading..." [showLoading]="showLoading"></loading>
+    <loading message="Loading..." [showLoading]="ShowLoading"></loading>
     
-    <app-chooser [selectedApp]="selectedApp" (onAppChosen)="onAppChosen($event,dt)">Loading...</app-chooser>
+    <app-chooser [selectedApp]="SelectedApp" (onAppChosen)="onAppChosen($event,dt)">Loading...</app-chooser>
     <br>
 
-    <p-contextMenu #cm [model]="contextMenuItems"></p-contextMenu>
+    <p-contextMenu #cm [model]="ContextMenuItems"></p-contextMenu>
 
-    <p-dataTable #dt [value]="mobilePrompts" selectionMode="single" [paginator]="true" [rows]="20" filterDelay="250" [contextMenu]="cm" 
-    [responsive]="true" [globalFilter]="gb" resizableColumns="true" columnResizeMode="expand" [(selection)]="selectedPrompt" (onFilter)="onFilter(dt)">
-    <p-column *ngFor="let col of cols" [sortable]="col.sortable" [field]="col.field" [header]="col.header" [hidden]="col.hidden">
+    <p-dataTable #dt [value]="GridDataSource" selectionMode="single" [paginator]="true" [rows]="NumberOfGridRows" filterDelay="0" [contextMenu]="cm" 
+    [responsive]="true" [globalFilter]="gb" resizableColumns="true" columnResizeMode="expand" [(selection)]="SelectedPrompt" (onFilter)="filterGrid(dt)">
+    <p-column [filter]="true" filterMatchMode="contains" *ngFor="let col of GridColumns" [sortable]="col.sortable" [field]="col.field" [header]="col.header" [hidden]="col.hidden">
     </p-column>
     </p-dataTable>
         
@@ -32,13 +32,15 @@ import {InputText, DataTable, Column, Header, Footer, Button, ContextMenu, Dialo
         <div>
         <i class="fa fa-search" style="float:left;margin:4px 4px 0 0"></i>
         <input #gb type="text" pInputText size="50" style="float:left:padding-right:20px;" placeholder="Enter Search">
-        <button *ngIf="dt.totalRecords > 0" type="button" pButton icon="fa-file-excel-o" (click)="onExport(dt);" [label]="exportString"></button>
+        <button *ngIf="ShowExportButton" type="button" pButton icon="fa-file-excel-o" (click)="onExport(dt);" [label]="ExportString"></button>
+        
         <button type="button" pButton icon="fa-plus" style="float:right" (click)="addPrompt();" label="Add Prompt"></button>
+        <button type="button" *ngIf="ClearFiltersNeeded" pButton icon="fa-refresh" style="float:right" (click)="clearFilters(dt);" label="Clear Filters"></button>
         </div>
     </div>
     
-    <p-dialog [center]="true" [resizable]="false" [height]="800" [contentHeight]="750" [width]="800" [closeOnEscape]="false" [closable]="false" [draggable]="true" [(visible)]="showModal" modal="modal" [showEffect]="fade">
-    <edit-mobile-prompt [IncomingModel]="PromptModel" (onCancel)="showModal=false;" (onDoneEdit)="onDoneEdit($event);" (onDoneAdd)="onDoneAdd($event);"></edit-mobile-prompt>
+    <p-dialog [center]="true" [resizable]="false" [height]="800" [contentHeight]="750" [width]="800" [closeOnEscape]="false" [closable]="false" [draggable]="true" [(visible)]="ShowModal" modal="modal" [showEffect]="fade">
+    <edit-mobile-prompt [IncomingModel]="PromptModel" (onCancel)="ShowModal=false;" (onDoneEdit)="onDoneEdit($event);" (onDoneAdd)="onDoneAdd($event);"></edit-mobile-prompt>
     </p-dialog>
     `
 })
@@ -55,13 +57,11 @@ import {InputText, DataTable, Column, Header, Footer, Button, ContextMenu, Dialo
 
 export class MobilePromptList extends DataTableComponentBase implements OnInit {
 
-    mobilePrompts: MobilePrompt[];
-    selectedApp: number = 15; //initial value
-    selectedPrompt: MobilePrompt;
-    showLoading: boolean = false;
+    SelectedApp: number = 15; //initial value
+    SelectedPrompt: MobilePrompt;
     PromptModel: MobilePrompt = new MobilePrompt();
-    showModal: boolean = false;
-    exportFileName: string = "mobile_prompt_export.csv";
+    ShowModal: boolean = false;
+    ExportFileName: string = "mobile_prompt_export.csv";
 
     constructor(private mobilePromptService: MobilePromptService) {
         super();
@@ -69,83 +69,92 @@ export class MobilePromptList extends DataTableComponentBase implements OnInit {
 
     ngOnInit() {
 
-        this.contextMenuItems = [
-            { label: 'Edit', icon: 'fa-edit', command: (event) => this.editPrompt() },
-            { label: 'Delete', icon: 'fa-close', command: (event) => this.deleteMobilePrompt() }
+        this.ContextMenuItems = [
+            { label: 'Edit Prompt', icon: 'fa-edit', command: (event) => this.editPrompt() },
+            { label: 'Delete Prompt', icon: 'fa-close', command: (event) => this.deleteMobilePrompt() }
+
         ];
 
         this.buildColumns();
 
         this.buildContextColumns();
 
-        this.getMobilePrompts(this.selectedApp);
+        this.getGridDataSource(this.SelectedApp);
     }
 
     buildColumns() {
-        this.cols = [
-            { field: 'promptID', header: 'Id', sortable: true, hidden: false },
-            { field: 'key', header: 'Key', sortable: true, hidden: false },
-            { field: 'translation', header: 'Translation', sortable: true, hidden: false },
-            { field: 'AppNum', header: 'App #', sortable: true, hidden: false },
-            { field: 'languageFriendly', header: 'Language', sortable: true, hidden: false },
-            { field: 'promptBehaviorTypeFriendly', header: 'Behavior Type', sortable: true, hidden: false },
-            { field: 'promptTypeFriendly', header: 'Type', sortable: true, hidden: false },
-            { field: 'HasChild', header: 'Has Child', sortable: true, hidden: false },
-            { field: 'Parent', header: 'Parent', sortable: true, hidden: false },
-            { field: 'Value', header: 'Value', sortable: true, hidden: false }
+        this.GridColumns = [
+            { field: 'promptID', header: 'Id', sortable: true, hidden: false, style: { "width": '50px' } },
+            { field: 'key', header: 'Key', sortable: true, hidden: false, style: { "width": '75px' } },
+            { field: 'translation', header: 'Translation', sortable: true, hidden: false, style: { "width": 'auto' } },
+            { field: 'AppNum', header: 'App #', sortable: true, hidden: false, style: { "width": '50px' } },
+            { field: 'languageFriendly', header: 'Language', sortable: true, hidden: false, style: { "width": '100px' } },
+            { field: 'promptBehaviorTypeFriendly', header: 'Behavior Type', sortable: true, hidden: false, style: { "width": '100px' } },
+            { field: 'promptTypeFriendly', header: 'Type', sortable: true, hidden: false, style: { "width": '100px' } },
+            { field: 'HasChild', header: 'Has Child', sortable: true, hidden: false, style: { "width": '100px' } },
+            { field: 'Parent', header: 'Parent', sortable: true, hidden: false, style: { "width": '50px' } },
+            { field: 'Value', header: 'Value', sortable: true, hidden: false, style: { "width": '50px' } }
         ];
     }
 
-    onFilter(dt: DataTable) {
-        let filteredData: MobilePrompt[] = (<any>dt).filteredValue;
-        if (filteredData != null) {
-            this.setExportString(filteredData.length);
-        }
-        else {
-            this.setExportString(this.mobilePrompts.length);
-        }
+    getGridDataSource(appNumber: Number) {
+
+        this.ShowLoading = true;
+
+        this.mobilePromptService.getMobilePrompts(appNumber)
+            .map(res => <MobilePrompt[]>res.json())
+            .subscribe(mp => {
+                this.GridDataSource = mp;
+                this.setExportString(this.GridDataSource.length); //put in an event that gets the rowcount and returns it and keep one to update button too
+                this.ShowLoading = false;
+            },
+            err => {
+                this.ShowLoading = false;
+                this.showErrors(err, 'Error retrieving mobile prompts');
+            }
+            );
     }
 
     onExport(dt: DataTable) {
-        
-        let hiddenColumns: string[] = (<Column[]>this.cols).filter(e => e.hidden == true).map(w => w.field);
+
+        let hiddenColumns: string[] = (<Column[]>this.GridColumns).filter(e => e.hidden == true).map(w => w.field);
         hiddenColumns.push("language");
         hiddenColumns.push("promptType");
         hiddenColumns.push("promptBehaviorType"); //hide the non friendly columns
-        
-        this.doExport(dt, this.mobilePrompts, this.cols, hiddenColumns,this.exportFileName);
+
+        this.doExport(dt, hiddenColumns, this.ExportFileName);
     }
 
     onAppChosen(appNumber: number, dt: DataTable) {
         dt.reset();
-        this.selectedApp = appNumber;
-        this.getMobilePrompts(appNumber); //initial data load
+        this.SelectedApp = appNumber;
+        this.getGridDataSource(appNumber); //initial data load
     }
 
     addPrompt() {
 
         this.PromptModel = new MobilePrompt();
-        this.PromptModel.AppNum = this.selectedApp;
-        this.showModal = true;
+        this.PromptModel.AppNum = this.SelectedApp;
+        this.ShowModal = true;
     }
 
     onDoneAdd(addedRow: MobilePrompt) {
 
-        this.mobilePrompts.push(addedRow);
-        this.showModal = false;
+        this.GridDataSource.push(addedRow);
+        this.ShowModal = false;
     }
 
     deleteMobilePrompt() {
-        if (this.selectedPrompt) {
+        if (this.SelectedPrompt) {
 
             var conf = confirm('Are you sure?');
 
             if (conf) {
-                let promptID = this.selectedPrompt.promptID;
+                let promptID = this.SelectedPrompt.promptID;
                 this.mobilePromptService.deleteMobilePrompt(promptID)
                     .subscribe(
                     mp => {
-                        this.mobilePrompts = this.mobilePrompts.filter(x => x.promptID != promptID);
+                        this.GridDataSource = this.GridDataSource.filter(x => x.promptID != promptID);
                         this.showGrowl('Prompt deleted', 'info', '');
                     },
                     err => {
@@ -158,52 +167,21 @@ export class MobilePromptList extends DataTableComponentBase implements OnInit {
     }
 
     editPrompt() {
-        if (this.selectedPrompt) {
+        if (this.SelectedPrompt) {
             this.PromptModel = null;
-            this.PromptModel = this.cloneObject(this.selectedPrompt);
-            this.showModal = true;
+            this.PromptModel = this.cloneObject(this.SelectedPrompt);
+            this.ShowModal = true;
         }
     }
 
     onDoneEdit(changedRow: MobilePrompt) {
 
-        this.showModal = false;
+        this.ShowModal = false;
 
-        var foundPrompt = this.mobilePrompts.filter(x => x.promptID == changedRow.promptID);
+        var foundPrompt = this.GridDataSource.filter(x => x.promptID == changedRow.promptID);
 
         if (foundPrompt[0]) {
-            this.mobilePrompts[this.mobilePrompts.indexOf(foundPrompt[0])] = changedRow;
+            this.GridDataSource[this.GridDataSource.indexOf(foundPrompt[0])] = changedRow;
         }
     }
-
-    getMobilePrompts(appNumber: Number) {
-
-        this.showLoading = true;
-
-        this.mobilePromptService.getMobilePrompts(appNumber)
-            .map(res => <MobilePrompt[]>res.json())
-            .subscribe(mp => {
-                this.mobilePrompts = mp;
-                this.setExportString(this.mobilePrompts.length);
-                this.showLoading = false;
-            },
-            err => {
-                this.showLoading = false;
-                this.showErrors(err, 'Error retrieving mobile prompts');
-            }
-            );
-    }
-
-
-
-
-
-
-
-
-
-
 }
-
-
-

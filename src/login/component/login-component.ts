@@ -28,16 +28,17 @@ import {appInjector} from '../../common/service/app-injector';
                 <control-messages control="userName"></control-messages>
             </div>
             
-                <div class="form-group">
+            <div class="form-group">
                 <div><label for="password">Password:</label></div>
                 <div ngClass="{{errorClassToUse(loginForm,'password')}}">
                     <input type="password" class="form-control" [ngFormControl]="password"  />
                 </div>
                 <control-messages control="password"></control-messages>
             </div>
-
+            
             <div class="form-group">
                 <button class="btn btn-success" [disabled]="!loginForm.valid || !loginForm.dirty">Submit</button>
+                <br><br>
                 <div [hidden]="!waiting"><i class="fa fa-spinner fa-spin"></i> Please wait...</div>
             </div> 
             </form>

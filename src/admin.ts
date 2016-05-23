@@ -35,6 +35,7 @@ import {TabMenu,MenuItem} from 'primeng/primeng';
     <div style="padding-left:5px;">
     <p-tabMenu [model]="items"></p-tabMenu>
     </div>
+    
     <div style="padding-left:5px;padding-top:25px;">
     <router-outlet></router-outlet>
     </div>

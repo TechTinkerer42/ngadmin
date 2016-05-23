@@ -158,7 +158,7 @@ export class CustomerAccountList extends ComponentBase {
             },
             err => {
                 this.gridOptions.api.hideOverlay();
-                this.showErrors(err,'Error retrieving user customer accounts');
+                this.showErrorAlert(err,'Error retrieving user customer accounts');
             }
             );
     }

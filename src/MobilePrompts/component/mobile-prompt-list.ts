@@ -2,20 +2,18 @@
 import {MobilePromptService} from '../service/mobile-prompt-service';
 import {MobilePrompt} from '../service/mobile-prompt-model';
 import {ApplicationChooser} from '../../common/component/app-chooser'
-import {Loading} from '../../common/component/loading'
+import {Notifier} from '../../common/component/notifier'
 import {EditMobilePrompt} from './edit-mobile-prompt';
 import {AuthService} from '../../common/service/auth-service';
 import {DataTableComponentBase} from '../../common/component/datatable-component-base';
 import {CanActivate} from '@angular/router-deprecated';
-import {InputText, DataTable, Column, Header, Footer, Button, ContextMenu, Dialog, Growl, Message} from 'primeng/primeng';
+import {InputText, DataTable, Column, Header, Footer, Button, ContextMenu, Dialog, Growl, Message,Messages} from 'primeng/primeng';
 
 @Component({
-    directives: [ApplicationChooser, EditMobilePrompt, DataTable, Column, Header, Footer, Button, ContextMenu, Dialog, Growl, Loading],
+    directives: [ApplicationChooser, EditMobilePrompt, DataTable, Column, Header, Footer, Button, ContextMenu, Dialog, Growl, Notifier,Messages],
     providers: [MobilePromptService],
     template: `
-    <p-growl [value]="messages"></p-growl>
-    
-    <loading message="Loading..." [showLoading]="ShowLoading"></loading>
+    <notifier [LoadingMessage]="LoadingMessage" [ErrorMessage]="ErrorMessage" [InfoMessage]="InfoMessage"></notifier>
     
     <app-chooser [selectedApp]="SelectedApp" (onAppChosen)="onAppChosen($event,dt)">Loading...</app-chooser>
     <br>
@@ -62,10 +60,17 @@ export class MobilePromptList extends DataTableComponentBase implements OnInit {
     PromptModel: MobilePrompt = new MobilePrompt();
     ShowModal: boolean = false;
     ExportFileName: string = "mobile_prompt_export.csv";
-
+    
+    
+    
+    
+    
     constructor(private mobilePromptService: MobilePromptService) {
         super();
     }
+
+
+    //absolutely need these
 
     ngOnInit() {
 
@@ -99,18 +104,18 @@ export class MobilePromptList extends DataTableComponentBase implements OnInit {
 
     getGridDataSource(appNumber: Number) {
 
-        this.ShowLoading = true;
+        this.LoadingMessage = "Loading...";
 
         this.mobilePromptService.getMobilePrompts(appNumber)
             .map(res => <MobilePrompt[]>res.json())
             .subscribe(mp => {
                 this.GridDataSource = mp;
                 this.setExportString(this.GridDataSource.length); //put in an event that gets the rowcount and returns it and keep one to update button too
-                this.ShowLoading = false;
+                this.LoadingMessage = "";
             },
             err => {
-                this.ShowLoading = false;
-                this.showErrors(err, 'Error retrieving mobile prompts');
+                this.LoadingMessage = "";
+                this.showErrorAlert(err, 'Error retrieving mobile prompts');
             }
             );
     }
@@ -125,11 +130,7 @@ export class MobilePromptList extends DataTableComponentBase implements OnInit {
         this.doExport(dt, hiddenColumns, this.ExportFileName);
     }
 
-    onAppChosen(appNumber: number, dt: DataTable) {
-        dt.reset();
-        this.SelectedApp = appNumber;
-        this.getGridDataSource(appNumber); //initial data load
-    }
+    //crud operations
 
     addPrompt() {
 
@@ -155,11 +156,11 @@ export class MobilePromptList extends DataTableComponentBase implements OnInit {
                     .subscribe(
                     mp => {
                         this.GridDataSource = this.GridDataSource.filter(x => x.promptID != promptID);
-                        this.showGrowl('Prompt deleted', 'info', '');
+                        this.InfoMessage = "Prompt deleted";
                     },
                     err => {
                         console.log(err);
-                        alert("Error deleting mobile prompt");
+                        this.showErrorAlert(err, 'Error deleting mobile prompt');
                     }
                     );
             }
@@ -183,5 +184,11 @@ export class MobilePromptList extends DataTableComponentBase implements OnInit {
         if (foundPrompt[0]) {
             this.GridDataSource[this.GridDataSource.indexOf(foundPrompt[0])] = changedRow;
         }
+    }
+    
+    onAppChosen(appNumber: number, dt: DataTable) {
+        dt.reset();
+        this.SelectedApp = appNumber;
+        this.getGridDataSource(appNumber); //initial data load
     }
 }

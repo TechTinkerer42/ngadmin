@@ -6,10 +6,14 @@ import {GoogleGeocoder} from '../../common/service/google-geocoder-service';
 import {CanActivate} from '@angular/router-deprecated';
 import {AuthService} from '../../common/service/auth-service';
 import {ComponentBase} from '../../common/component/component-base';
+import {Notifier} from '../../common/component/notifier';
 
 @Component({
     providers: [GeocoderService, GoogleGeocoder],
+    directives:[Notifier],
     template: ` 
+    <notifier [LoadingMessage]="LoadingMessage" [ErrorMessage]="ErrorMessage" [InfoMessage]="InfoMessage"></notifier>
+    
     <div class="container-fluid">
         <div class="row" *ngIf="showGeocodeForm">
             <label for="geocodeType">Type:</label>
@@ -162,7 +166,7 @@ export class Geocoder extends ComponentBase {
             },
             err => {
                 this.waiting = false;
-                this.showErrors(err,'Error retrieving locations')
+                this.showErrorAlert(err,'Error retrieving locations')
                 
             }
             );
@@ -179,7 +183,7 @@ export class Geocoder extends ComponentBase {
             },
             err => {
                 console.log(err);
-                this.showErrors(err,'Error saving geocoding locations')
+                this.showErrorAlert(err,'Error saving geocoding locations')
             });
     }
 

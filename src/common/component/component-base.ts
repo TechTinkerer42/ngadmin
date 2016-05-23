@@ -3,7 +3,17 @@ import {Message, DataTable, Column} from 'primeng/primeng';
 
 export class ComponentBase {
 
-    messages: Message[] = [];
+    ErrorMessage:string;
+    LoadingMessage:string;
+    InfoMessage:string;
+    
+    showErrorAlert(err: any, message: string = '') {
+        if (err.status == "403") {
+            message = "Unauthorized access";
+            localStorage.removeItem("id_token");
+        }
+        this.ErrorMessage = message;
+    }
     
     errorClassToUse(form: ControlGroup, inputName: string, isGroup: boolean = false): string {
 
@@ -15,20 +25,7 @@ export class ComponentBase {
         }
     }
 
-    showErrors(err: any, message: string = '') {
-        if (err.status == "403") {
-            message = "Unauthorized access";
-            localStorage.removeItem("id_token");
-            alert(message);
-            window.location.reload();
-        }
-
-        alert(message);;
-    }
-
-    showGrowl(message: string, severity: string, summary: string) {
-        this.messages.push({ severity: severity, summary: summary, detail: message });
-    }
+    
 
     
 

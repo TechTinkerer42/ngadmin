@@ -14,7 +14,6 @@ export class DataTableComponentBase extends ComponentBase {
     GridColumns: any[];
     GridDataSource:any[];
     NumberOfGridRows: number = 20;
-    ShowLoading: boolean = false;
     
     
     filterGrid(dt: DataTable) {
@@ -122,7 +121,7 @@ export class DataTableComponentBase extends ComponentBase {
         tempLink.href = csvURL;
         tempLink.setAttribute('download', filename);
         
-        setTimeout(() => tempLink.click(),500); //settimeout prevents double linking
+        setTimeout(() => tempLink.click(),200); //settimeout prevents double linking
         
         
         

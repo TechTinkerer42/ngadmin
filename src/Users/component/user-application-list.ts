@@ -121,7 +121,7 @@ export class UserApplicationList extends ComponentBase  {
             },
             err => {
                 this.gridOptions.api.hideOverlay();
-                 this.showErrors(err,'Error retrieving user list');
+                 this.showErrorAlert(err,'Error retrieving user list');
             }
             );
 

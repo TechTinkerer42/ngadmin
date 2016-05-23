@@ -10,19 +10,12 @@ export class MobilePromptService {
     
     constructor( private httpHelper: HttpHelper) {
     }
-
-    
-   
-    
-   
-    
     
     getMobilePrompts(appNumber: Number) {
         
         return this.httpHelper.makeHttpCall('AngularAdmin/GetMobilePrompts', JSON.stringify({ appNumber: appNumber }), 'POST');
     }
     
-
     deleteMobilePrompt(promptID: number) {
         return this.httpHelper.makeHttpCall('AngularAdmin/DeleteMobilePrompt', JSON.stringify({ promptID: promptID }), 'POST');
     }

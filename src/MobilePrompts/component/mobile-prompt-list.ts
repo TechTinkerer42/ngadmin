@@ -2,27 +2,27 @@
 import {MobilePromptService} from '../service/mobile-prompt-service';
 import {MobilePrompt} from '../service/mobile-prompt-model';
 import {ApplicationChooser} from '../../common/component/app-chooser'
-import {Notifier} from '../../common/component/notifier'
+import {Loading} from '../../common/component/loading'
 import {EditMobilePrompt} from './edit-mobile-prompt';
 import {AuthService} from '../../common/service/auth-service';
 import {DataTableComponentBase} from '../../common/component/datatable-component-base';
 import {CanActivate} from '@angular/router-deprecated';
-import {InputText, DataTable, Column, Header, Footer, Button, ContextMenu, Dialog, Growl, Message,Messages} from 'primeng/primeng';
+import {InputText, DataTable, Column, Header, Footer, Button, ContextMenu, Dialog} from 'primeng/primeng';
 
 @Component({
-    directives: [ApplicationChooser, EditMobilePrompt, DataTable, Column, Header, Footer, Button, ContextMenu, Dialog, Growl, Notifier,Messages],
+    directives: [ApplicationChooser, EditMobilePrompt, DataTable, Column, Header, Footer, Button, ContextMenu, Dialog, Loading],
     providers: [MobilePromptService],
     template: `
-    <notifier [LoadingMessage]="LoadingMessage" [ErrorMessage]="ErrorMessage" [InfoMessage]="InfoMessage"></notifier>
-    
+    <div class="col-md-12">
+    <loading LoadingMessage="Loading..." [ShowLoading]="ShowLoading"></loading>
     <app-chooser [selectedApp]="SelectedApp" (onAppChosen)="onAppChosen($event,dt)">Loading...</app-chooser>
     <br>
 
     <p-contextMenu #cm [model]="ContextMenuItems"></p-contextMenu>
 
     <p-dataTable #dt [value]="GridDataSource" selectionMode="single" [paginator]="true" [rows]="NumberOfGridRows" filterDelay="0" [contextMenu]="cm" 
-    [responsive]="true" [globalFilter]="gb" resizableColumns="true" columnResizeMode="expand" [(selection)]="SelectedPrompt" (onFilter)="filterGrid(dt)">
-    <p-column [filter]="true" filterMatchMode="contains" *ngFor="let col of GridColumns" [sortable]="col.sortable" [field]="col.field" [header]="col.header" [hidden]="col.hidden">
+    [globalFilter]="gb" resizableColumns="true" columnResizeMode="expand" [(selection)]="SelectedPrompt" (onFilter)="filterGrid(dt)">
+    <p-column [filter]="true" filterMatchMode="contains" *ngFor="let col of GridColumns" [sortable]="col.sortable" [field]="col.field" [header]="col.header" [hidden]="col.hidden" [style]="col.style">
     </p-column>
     </p-dataTable>
         
@@ -40,6 +40,7 @@ import {InputText, DataTable, Column, Header, Footer, Button, ContextMenu, Dialo
     <p-dialog [center]="true" [resizable]="false" [height]="800" [contentHeight]="750" [width]="800" [closeOnEscape]="false" [closable]="false" [draggable]="true" [(visible)]="ShowModal" modal="modal" [showEffect]="fade">
     <edit-mobile-prompt [IncomingModel]="PromptModel" (onCancel)="ShowModal=false;" (onDoneEdit)="onDoneEdit($event);" (onDoneAdd)="onDoneAdd($event);"></edit-mobile-prompt>
     </p-dialog>
+    </div>
     `
 })
 
@@ -53,6 +54,13 @@ import {InputText, DataTable, Column, Header, Footer, Button, ContextMenu, Dialo
 
 
 
+
+
+
+
+
+
+
 export class MobilePromptList extends DataTableComponentBase implements OnInit {
 
     SelectedApp: number = 15; //initial value
@@ -61,14 +69,9 @@ export class MobilePromptList extends DataTableComponentBase implements OnInit {
     ShowModal: boolean = false;
     ExportFileName: string = "mobile_prompt_export.csv";
     
-    
-    
-    
-    
     constructor(private mobilePromptService: MobilePromptService) {
         super();
     }
-
 
     //absolutely need these
 
@@ -89,33 +92,33 @@ export class MobilePromptList extends DataTableComponentBase implements OnInit {
 
     buildColumns() {
         this.GridColumns = [
-            { field: 'promptID', header: 'Id', sortable: true, hidden: false, style: { "width": '50px' } },
-            { field: 'key', header: 'Key', sortable: true, hidden: false, style: { "width": '75px' } },
+            { field: 'promptID', header: 'Id', sortable: true, hidden: false, style: { "width": '60px' } },
+            { field: 'key', header: 'Key', sortable: true, hidden: false, style: { "width": '200px' } },
             { field: 'translation', header: 'Translation', sortable: true, hidden: false, style: { "width": 'auto' } },
-            { field: 'AppNum', header: 'App #', sortable: true, hidden: false, style: { "width": '50px' } },
+            { field: 'AppNum', header: 'App #', sortable: true, hidden: false, style: { "width": '75px' } },
             { field: 'languageFriendly', header: 'Language', sortable: true, hidden: false, style: { "width": '100px' } },
             { field: 'promptBehaviorTypeFriendly', header: 'Behavior Type', sortable: true, hidden: false, style: { "width": '100px' } },
             { field: 'promptTypeFriendly', header: 'Type', sortable: true, hidden: false, style: { "width": '100px' } },
-            { field: 'HasChild', header: 'Has Child', sortable: true, hidden: false, style: { "width": '100px' } },
-            { field: 'Parent', header: 'Parent', sortable: true, hidden: false, style: { "width": '50px' } },
-            { field: 'Value', header: 'Value', sortable: true, hidden: false, style: { "width": '50px' } }
+            { field: 'HasChild', header: 'Has Child', sortable: true, hidden: false, style: { "width": '75px' } },
+            { field: 'Parent', header: 'Parent', sortable: true, hidden: false, style: { "width": '75px' } },
+            { field: 'Value', header: 'Value', sortable: true, hidden: false, style: { "width": '75px' } }
         ];
     }
 
     getGridDataSource(appNumber: Number) {
 
-        this.LoadingMessage = "Loading...";
+        this.ShowLoading = true;
 
         this.mobilePromptService.getMobilePrompts(appNumber)
             .map(res => <MobilePrompt[]>res.json())
             .subscribe(mp => {
                 this.GridDataSource = mp;
                 this.setExportString(this.GridDataSource.length); //put in an event that gets the rowcount and returns it and keep one to update button too
-                this.LoadingMessage = "";
+                this.ShowLoading = false;
             },
             err => {
-                this.LoadingMessage = "";
-                this.showErrorAlert(err, 'Error retrieving mobile prompts');
+                this.ShowLoading = false;
+                this.showError(err, 'Error retrieving mobile prompts');
             }
             );
     }
@@ -156,11 +159,10 @@ export class MobilePromptList extends DataTableComponentBase implements OnInit {
                     .subscribe(
                     mp => {
                         this.GridDataSource = this.GridDataSource.filter(x => x.promptID != promptID);
-                        this.InfoMessage = "Prompt deleted";
                     },
                     err => {
                         console.log(err);
-                        this.showErrorAlert(err, 'Error deleting mobile prompt');
+                        this.showError(err, 'Error deleting mobile prompt');
                     }
                     );
             }

@@ -208,7 +208,7 @@ export class FileImporter extends ComponentBase {
                 err => {
                     this.waiting = false;
                     
-                    this.showErrors(err,'System Error Occurred');
+                    this.showError(err,'System Error Occurred');
                     
                 }
                 );
@@ -296,7 +296,7 @@ export class FileImporter extends ComponentBase {
             }, 
             err => {
                 this.waiting = false;
-                this.showErrors(err,'System Error Occurred');
+                this.showError(err,'System Error Occurred');
             });
     }
 
@@ -321,7 +321,7 @@ export class FileImporter extends ComponentBase {
             },
             err => {
                 this.waiting = false;
-                this.showErrors(err,'Error retrieving table columns');
+                this.showError(err,'Error retrieving table columns');
                 
             }
             );
@@ -338,7 +338,7 @@ export class FileImporter extends ComponentBase {
             },
             err => {
                 this.waiting = false;
-                this.showErrors(err,'Error retrieving sample data');
+                this.showError(err,'Error retrieving sample data');
                 
             }
             );

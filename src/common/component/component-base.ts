@@ -3,16 +3,12 @@ import {Message, DataTable, Column} from 'primeng/primeng';
 
 export class ComponentBase {
 
-    ErrorMessage:string;
-    LoadingMessage:string;
-    InfoMessage:string;
-    
-    showErrorAlert(err: any, message: string = '') {
+    showError(err: any, message: string = '') {
         if (err.status == "403") {
             message = "Unauthorized access";
             localStorage.removeItem("id_token");
         }
-        this.ErrorMessage = message;
+        alert(message);
     }
     
     errorClassToUse(form: ControlGroup, inputName: string, isGroup: boolean = false): string {

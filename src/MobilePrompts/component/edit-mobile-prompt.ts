@@ -125,15 +125,6 @@ export class EditMobilePrompt extends ComponentBase {
 
 
     }
-
-    clonePrompt(p: MobilePrompt): MobilePrompt {
-        let newPrompt: MobilePrompt = new MobilePrompt();
-        for (let prop in p) {
-            newPrompt[prop] = p[prop];
-        }
-        return newPrompt;
-    }
-
     
 
     //model

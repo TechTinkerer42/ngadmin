@@ -1,137 +1,118 @@
-﻿import {Component, ReflectiveInjector } from '@angular/core'
-import {AgGridNg2} from 'ag-grid-ng2/main';
-import {GridOptions} from 'ag-grid/main';
-
-import {SearchComponent} from '../../common/component/searcher';
-
+﻿
+import {Component, ReflectiveInjector, OnInit, TemplateRef} from '@angular/core'
 import {UserService} from '../service/user-service';
-
 import {UserApplication} from '../service/user-application-model';
-
-
+import {Loading} from '../../common/component/loading'
 import {AuthService} from '../../common/service/auth-service';
-
+import {DataTableComponentBase} from '../../common/component/datatable-component-base';
 import {CanActivate} from '@angular/router-deprecated';
-
-import {ComponentBase} from '../../common/component/component-base';
-
+import {DataTable, Column, Header, Button} from 'primeng/primeng';
 
 @Component({
-    directives: [AgGridNg2, SearchComponent],
+    directives: [DataTable, Column, Header, Button, Loading],
     providers: [UserService],
     template: `
+    <div class="col-md-12">
+    <loading LoadingMessage="Loading..." [ShowLoading]="ShowLoading"></loading>
+
+    <p-contextMenu #cm [model]="ContextMenuItems"></p-contextMenu>
+
+    <p-dataTable #dt [value]="GridDataSource" selectionMode="single" [paginator]="true" [rows]="NumberOfGridRows" filterDelay="0"  
+    [globalFilter]="gb" resizableColumns="true"  (onFilter)="filterGrid(dt)">
+    <p-column [filter]="true" filterMatchMode="contains" *ngFor="let col of GridColumns" [style]="col.style" [sortable]="col.sortable" [field]="col.field" [header]="col.header" [hidden]="col.hidden">
+    </p-column>
+    </p-dataTable>
         
-
-
-    <div class="row">
-        <div class="col-md-5">
-            <ag-grid-ng2 #agGrid style="height: 350px;width: 700px;" class="ag-blue" [gridOptions]="gridOptions"></ag-grid-ng2>
+    <div class="ui-widget-header ui-helper-clearfix" style="padding:4px 10px;border-bottom: 0 none">
+        <div>
+        <i class="fa fa-search" style="float:left;margin:4px 4px 0 0"></i>
+        <input #gb type="text" pInputText size="50" style="float:left:padding-right:20px;" placeholder="Enter Search">
+        <button *ngIf="ShowExportButton" type="button" pButton icon="fa-file-excel-o" (click)="onExport(dt);" [label]="ExportString"></button>
+        
+        <button type="button" *ngIf="ClearFiltersNeeded" pButton icon="fa-refresh" style="float:right" (click)="clearFilters(dt);" label="Clear Filters"></button>
         </div>
     </div>
-
-    <div class="row">
-        <div class="col-md-2">
-            <searcher (onSearchTermEntered) = "onSearchTermEntered($event)"></searcher>
-        </div>
-        <div class="col-md-2 text-right">    
-            {{rowsDisplayed}}
-        </div>
     </div>
     `
 })
+
+
 
 @CanActivate((next, previous) => {
     let injector: any = ReflectiveInjector.resolveAndCreate([AuthService]);
     let authService: AuthService = injector.get(AuthService);
     return authService.checkLogin(next, previous);
-})  
+})
 
-export class UserApplicationList extends ComponentBase  {
-    columnDefs: [{}];
-    gridOptions: GridOptions = [];
-    searchTerm: string = "";
-    rowsDisplayed: string;
-    userApplications: UserApplication[];
+
+
+export class UserApplicationList extends DataTableComponentBase implements OnInit {
+
+    ExportFileName: string = "user_applications.csv";
     
-
-    constructor( private userService: UserService) {
-        
+    constructor(private userService: UserService) {
         super();
+    }
+
+    //absolutely need these
+
+    ngOnInit() {
+
+        this.buildColumns();
+
+        this.getGridDataSource();
+    }
+
+    buildColumns() {
         
-        this.columnDefs = [
-            { headerName: "UserName", field: "UserName" },
-            { headerName: "AppName", field: "strApplicationName", width: 300},
-            { headerName: "App#", field: "AppNumber"}
+        this.GridColumns = [
+            { field: 'UserName', header: 'User Name', sortable: true, hidden: false, style: { "width": 'auto' } },
+            { field: 'strApplicationName', header: 'App Name', sortable: true, hidden: false, style: { "width": 'auto' } },
+            { field: 'AppNumber', header: 'App #', sortable: true, hidden: false, style: { "width": '100px' } }
         ];
-        
-        this.gridOptions = {
-            columnDefs: this.columnDefs,
-            enableColResize: true,
-            enableSorting: true,
-            enableFilter: false,
-            overlayNoRowsTemplate: "<span style='padding: 10px; border: 1px solid #444; background: lightgoldenrodyellow;'>No results</span>",
-            overlayLoadingTemplate: "<span style='padding: 10px; border: 1px solid #444; background: lightgoldenrodyellow;'><i class='fa fa-spinner fa-spin'></i> Loading...</span>",
-
-        }
-        this.getUserApplications();
-
-       
-
-        
-       
-
     }
 
-    showRowMessage() {
-        var model = this.gridOptions.api.getModel();
-        var processedRows = model.getRowCount();
-        this.rowsDisplayed = `${processedRows} of ${this.userApplications.length}`;
+    getGridDataSource() {
 
-        this.gridOptions.api.hideOverlay();
-        if (processedRows < 1) {
-            //show overlay of no rows
-            this.gridOptions.api.showNoRowsOverlay();
-
-        }
-
-
-    }
-
-    onSearchTermEntered(filterValue:string) {
-        console.log(filterValue);
-
-        this.gridOptions.api.setQuickFilter(filterValue);
-        this.showRowMessage();
-    }
-    
-    getUserApplications() {
-
+        this.ShowLoading = true;
 
         this.userService.getUserApplications()
-            .subscribe(
-            ua => {
-
-                this.userApplications = ua;
-
-                if (this.gridOptions.api) {
-                    this.gridOptions.api.setRowData(this.userApplications);
-                    this.gridOptions.api.sizeColumnsToFit();
-                    this.showRowMessage();
-                }
+            .subscribe(ua => {
+                this.GridDataSource = ua;
+                this.setExportString(this.GridDataSource.length); //put in an event that gets the rowcount and returns it and keep one to update button too
+                this.ShowLoading = false;
             },
             err => {
-                this.gridOptions.api.hideOverlay();
-                 this.showErrorAlert(err,'Error retrieving user list');
+                this.ShowLoading = false;
+                this.showError(err, 'Error retrieving users');
             }
             );
-
-
-       
             
     }
 
+    onExport(dt: DataTable) {
+
+        let hiddenColumns: string[] = (<Column[]>this.GridColumns).filter(e => e.hidden == true).map(w => w.field);
+        this.doExport(dt, hiddenColumns, this.ExportFileName);
+    }
+
+  
+
+   
+   
+
+    
+
+   
+
+   
+    
     
 }
+
+
+
+        
 
 
 

@@ -1,15 +1,15 @@
-﻿import {Component, ReflectiveInjector} from '@angular/core'
-import {AgGridNg2} from 'ag-grid-ng2/main';
-import {GridOptions} from 'ag-grid/main';
-import {SearchComponent} from '../../common/component/searcher';
+﻿import {Component, ReflectiveInjector, OnInit, TemplateRef} from '@angular/core'
+import {ApplicationChooser} from '../../common/component/app-chooser'
+import {Loading} from '../../common/component/loading'
+import {AuthService} from '../../common/service/auth-service';
+import {DataTableComponentBase} from '../../common/component/datatable-component-base';
+import {CanActivate} from '@angular/router-deprecated';
+import {InputText, DataTable, Column, Header, Footer, Button, ContextMenu, Dialog} from 'primeng/primeng';
 import {CustomerAccountService} from '../service/customer-account-service';
 import {CustomerAccount} from '../service/customer-account-model';
-import {ComponentBase} from '../../common/component/component-base';
-
-import {MODAL_DIRECTIVES} from 'ng2-bs3-modal/ng2-bs3-modal';
 import {EditCustomerAccount} from './edit-customer-account';
-import {CanActivate} from '@angular/router-deprecated';
-import {AuthService} from '../../common/service/auth-service';
+
+
 
 
 @CanActivate((next, previous) => {
@@ -19,39 +19,34 @@ import {AuthService} from '../../common/service/auth-service';
 })
 
 @Component({
-    directives: [AgGridNg2, SearchComponent, MODAL_DIRECTIVES, EditCustomerAccount],
+    directives: [EditCustomerAccount, DataTable, Column, Header, Footer, Button, ContextMenu, Dialog, Loading],
     providers: [CustomerAccountService],
     template: `
+    <div class="col-md-12">
+    <loading LoadingMessage="Loading..." [ShowLoading]="ShowLoading"></loading>
     
-    <modal #modal keyboard="false" [animation]="false">
-        <modal-header [show-close]="false">
-            <h4 style="float:left" class="modal-title">{{action}} Account</h4>
-        </modal-header>
-        <modal-body>
-            <edit-customer-account [IncomingModel]="CustomerAccountModel" (onCancel)="modal.close();" (onDoneAdd)="onDoneAdd(modal);"></edit-customer-account>
-        </modal-body>
-    </modal>
+    <p-contextMenu #cm [model]="ContextMenuItems"></p-contextMenu>
 
-
-    <div class="row">
-        <div class="col-md-2 col-md-offset-6">
-            <button type="button" class="btn btn-primary" (click)="openModal(modal,'Add');">Add Account</button>
-            <br><br>
+    <p-dataTable #dt [value]="GridDataSource" selectionMode="single" [paginator]="true" [rows]="NumberOfGridRows" filterDelay="0"  
+    [globalFilter]="gb" resizableColumns="true" columnResizeMode="expand" (onFilter)="filterGrid(dt)">
+    <p-column [filter]="true" filterMatchMode="contains" *ngFor="let col of GridColumns" [sortable]="col.sortable" [field]="col.field" [header]="col.header" [hidden]="col.hidden" [style]="col.style">
+    </p-column>
+    </p-dataTable>
+        
+    <div class="ui-widget-header ui-helper-clearfix" style="padding:4px 10px;border-bottom: 0 none">
+        <div>
+        <i class="fa fa-search" style="float:left;margin:4px 4px 0 0"></i>
+        <input #gb type="text" pInputText size="50" style="float:left:padding-right:20px;" placeholder="Enter Search">
+        <button *ngIf="ShowExportButton" type="button" pButton icon="fa-file-excel-o" (click)="onExport(dt);" [label]="ExportString"></button>
+        
+        <button type="button" pButton icon="fa-plus" style="float:right" (click)="addCustomerAccount();" label="Add Account"></button>
+        <button type="button" *ngIf="ClearFiltersNeeded" pButton icon="fa-refresh" style="float:right" (click)="clearFilters(dt);" label="Clear Filters"></button>
         </div>
     </div>
-    <div class="row">
-        <div class="col-md-12">
-            <ag-grid-ng2 #agGrid style="height: 400px;" class="ag-blue" [gridOptions]="gridOptions"></ag-grid-ng2>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-2">
-            <searcher (onSearchTermEntered) = "onSearchTermEntered($event)"></searcher>
-        </div>
-        <div class="col-md-2 col-md-offset-4">    
-            Rows: {{rowsDisplayed}}
-        </div>
+    
+    <p-dialog [center]="true" [resizable]="false" [height]="600" [contentHeight]="600" [width]="600" [closeOnEscape]="false" [closable]="false" [draggable]="true" [(visible)]="ShowModal" modal="modal" [showEffect]="fade">
+    <edit-customer-account [IncomingModel]="PromptModel" (onCancel)="ShowModal=false;" (onDoneEdit)="onDoneEdit($event);" (onDoneAdd)="onDoneAdd($event);"></edit-customer-account>
+    </p-dialog>
     </div>
     `
 })
@@ -59,113 +54,87 @@ import {AuthService} from '../../common/service/auth-service';
 
 
 
-export class CustomerAccountList extends ComponentBase {
-    columnDefs: [{}];
-    gridOptions: GridOptions = [];
-    searchTerm: string = "";
-    rowsDisplayed: string;
-    customerAccounts: CustomerAccount[];
-    action: string;
+
+
+export class CustomerAccountList extends DataTableComponentBase implements OnInit {
 
     CustomerAccountModel: CustomerAccount = new CustomerAccount();
-
-    showConfirmOption: boolean = false;
-
-    constructor( private customerAccountService: CustomerAccountService) {
-
+    ShowModal: boolean = false;
+    ExportFileName: string = "customer_accounts_export.csv";
+    
+    constructor(private customerAccountService: CustomerAccountService) {
         super();
+    }
 
-        this.columnDefs = [
-            { headerName: "Account ID", field: "Account_ID", width: 120 },
-            { headerName: "Account", field: "Account_Name", width: 600 },
-            { headerName: "Account App#", field: "Account_AppNumber", width: 150 }
+    //absolutely need these
+
+    ngOnInit() {
+
+        this.buildColumns();
+
+        this.getGridDataSource();
+    }
+
+
+    buildColumns() {
+        this.GridColumns = [
+            { field: 'Account_ID', header: 'Account ID', sortable: true, hidden: false, style: { "width": '100px' } },
+            { field: 'Account_Name', header: 'Account', sortable: true, hidden: false, style: { "width": 'auto' } },
+            { field: 'Account_AppNumber', header: 'Account App #', sortable: true, hidden: false, style: { "width": '150px' } }
         ];
-
-        this.gridOptions = {
-            columnDefs: this.columnDefs,
-            enableColResize: true,
-            enableSorting: true,
-            rowSelection: 'single',
-            overlayNoRowsTemplate: "<span style='padding: 10px; border: 1px solid #444; background: lightgoldenrodyellow;'>No results</span>",
-            overlayLoadingTemplate: "<span style='padding: 10px; border: 1px solid #444; background: lightgoldenrodyellow;'><i class='fa fa-spinner fa-spin'></i> Loading...</span>",
-        }
-
-        this.getCustomerAccounts(); //initial data load
     }
 
-    openModal(modal: any, action: string) {
-        this.action = action;
-        if (action === 'Add') {
-            this.CustomerAccountModel = new CustomerAccount();
-            this.gridOptions.api.deselectAll();
-        }
+    getGridDataSource() {
 
-        modal.open();
-    }
+        this.ShowLoading = true;
 
-    onDoneAdd(modal: any) {
-
-        modal.close();
-
-        this.getCustomerAccounts();
-    }
-
-
-
-
-
-
-
-    cloneAccount(c: CustomerAccount): CustomerAccount {
-        let newCA = new CustomerAccount();
-        for (let prop in c) {
-            newCA[prop] = c[prop];
-        }
-        return newCA;
-    }
-
-
-    showRowMessage() {
-        var model = this.gridOptions.api.getModel();
-        var processedRows = model.getRowCount();
-        this.rowsDisplayed = `${processedRows} of ${this.customerAccounts.length}`;
-
-        this.gridOptions.api.hideOverlay();
-        if (processedRows < 1) {
-            this.gridOptions.api.showNoRowsOverlay();
-        }
-    }
-
-    onSearchTermEntered(filterValue: string) {
-        this.gridOptions.api.deselectAll();
-        this.gridOptions.api.setQuickFilter(filterValue);
-        this.showRowMessage();
-        this.CustomerAccountModel = new CustomerAccount();
-    }
-
-    getCustomerAccounts() {
         this.customerAccountService.getCustomerAccounts()
-            .subscribe(
-            ca => {
-
-                this.customerAccounts = ca.json();
-
-                if (this.gridOptions.api) {
-                    this.gridOptions.api.setRowData(this.customerAccounts);
-                    this.gridOptions.api.sizeColumnsToFit();
-                    this.showRowMessage();
-                }
+            .map(res => <CustomerAccount[]>res.json())
+            .subscribe(ca => {
+                this.GridDataSource = ca;
+                this.setExportString(this.GridDataSource.length); //put in an event that gets the rowcount and returns it and keep one to update button too
+                this.ShowLoading = false;
             },
             err => {
-                this.gridOptions.api.hideOverlay();
-                this.showErrorAlert(err,'Error retrieving user customer accounts');
+                this.ShowLoading = false;
+                this.showError(err, 'Error retrieving customer accounts');
             }
             );
     }
 
+    onExport(dt: DataTable) {
 
+        let hiddenColumns: string[] = (<Column[]>this.GridColumns).filter(e => e.hidden == true).map(w => w.field);
+        
+        this.doExport(dt, hiddenColumns, this.ExportFileName);
+    }
 
+    //crud operations
+
+    addCustomerAccount() {
+
+        this.CustomerAccountModel = new CustomerAccount();
+        this.ShowModal = true;
+    }
+
+    onDoneAdd(addedRow: CustomerAccount) {
+
+        this.GridDataSource.push(addedRow);
+        this.ShowModal = false;
+    }
+
+   
+
+   
+
+  
+    
+    
 }
+
+
+
+
 
 
 

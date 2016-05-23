@@ -35,6 +35,9 @@ import {appInjector} from '../../common/service/app-injector';
                 </div>
                 <control-messages control="password"></control-messages>
             </div>
+            <div class="form-group">
+                <input type="checkbox" [ngFormControl]="rememberMe"  />&nbsp;<label for="rememberMe">Remember Me:</label>
+            </div>
             
             <div class="form-group">
                 <button class="btn btn-success" [disabled]="!loginForm.valid || !loginForm.dirty">Submit</button>
@@ -66,6 +69,7 @@ export class LoginComponent extends ComponentBase implements OnInit {
     loginForm: ControlGroup;
     userName: AbstractControl;
     password: AbstractControl;
+    rememberMe: AbstractControl;
     
     ngOnInit() { 
         this.buildForm();
@@ -84,21 +88,33 @@ export class LoginComponent extends ComponentBase implements OnInit {
     
     buildForm() {
         
+        let storedUserName = localStorage.getItem('username');
+        let rememberMeChecked = false;
+        if(storedUserName == null)
+        {
+            storedUserName = "";
+        }
+        else{
+            rememberMeChecked = true;
+        }
         this.alertMessage = '';
 
         this.loginForm = this.fb.group({
-            'userName': ['', ValidationService.RequiredValidator],
+            'userName': [storedUserName, ValidationService.RequiredValidator],
             'password': ['', ValidationService.RequiredValidator],
+            'rememberMe': [rememberMeChecked],
         });
 
         this.userName = this.loginForm.controls['userName'];
         this.password = this.loginForm.controls['password'];
+        this.rememberMe = this.loginForm.controls['rememberMe'];
         
         
     }
     
     loginUser() {
-         this.alertMessage = '';
+        
+        this.alertMessage = '';
                     
         var formData = this.loginForm.value;
 
@@ -109,7 +125,16 @@ export class LoginComponent extends ComponentBase implements OnInit {
         this.loginService.loginUser(data)
             .subscribe(
             mp => {
-                //console.log(mp.token);
+                
+                if(this.rememberMe.value)
+                {
+                   localStorage.setItem('username',formData.userName);    
+                }
+                else{
+                    localStorage.removeItem('username');
+                }
+                
+                
                 localStorage.setItem('id_token',mp.token);
                 this.waiting = false;
                 

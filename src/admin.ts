@@ -9,6 +9,7 @@ import {MobilePromptList} from './MobilePrompts/component/mobile-prompt-list';
 import {FileImporter} from './Importer/component/file-importer';
 import {Geocoder} from './Geocoder/component/geocoder-main';
 import {BlankComponent} from './common/component/blank-component'
+import {TicketsList} from './Tickets/component/tickets-list'
 import {AuthService} from './common/service/auth-service';
 
 import { 
@@ -51,6 +52,7 @@ import {TabMenu,MenuItem} from 'primeng/primeng';
     { path: '/mobilepromptslist', name: 'MobilePromptList', component: MobilePromptList },
     { path: '/fileimport/', name: 'FileImporter', component: FileImporter },
     { path: '/geocoder/', name: 'Geocoder', component: Geocoder },
+    { path: '/tickets/', name: 'TicketsList', component: TicketsList },
     { path: '/', name: 'AdminHome', component: BlankComponent,useAsDefault: true },
 ])
 
@@ -68,6 +70,7 @@ export class Admin   {
             {label: 'Mobile Prompts', icon: 'fa-volume-up',url: ['MobilePromptList']},
             {label: 'File Importer', icon: 'fa-upload',url: ['FileImporter']},
             {label: 'Geo-coder', icon: 'fa-globe',url: ['Geocoder']},
+            {label: 'Tickets', icon: 'fa-ticket',url: ['TicketsList']},
             {label: 'Log-off', icon: 'fa-sign-out',command: (event) => {
                 localStorage.removeItem("id_token");
                 this.authService.navigateTo('/Login');

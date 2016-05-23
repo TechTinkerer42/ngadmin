@@ -6,6 +6,7 @@ import {GoogleGeocoder} from '../../common/service/google-geocoder-service';
 import {CanActivate} from '@angular/router-deprecated';
 import {AuthService} from '../../common/service/auth-service';
 import {ComponentBase} from '../../common/component/component-base';
+import 'rxjs/add/observable/interval';
 
 
 @Component({

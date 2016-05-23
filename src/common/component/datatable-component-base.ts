@@ -46,7 +46,8 @@ export class DataTableComponentBase extends ComponentBase {
     buildContextColumns() {
         for (let c in this.GridColumns) {
             let col: Column = this.GridColumns[c];
-            this.ContextMenuItems.push({ label: col.header, icon: 'fa-minus', command: (event) => this.toggleColumn(col.header, 'fa-minus') });
+            let icon:string = col.hidden == true ? 'fa-plus' : 'fa-minus';
+            this.ContextMenuItems.push({ label: col.header, icon: icon, command: (event) => this.toggleColumn(col.header, icon) });
         }
     }
     

@@ -7,9 +7,8 @@ import {ValidationService} from '../../common/service/validation-service';
 import {ComponentBase} from '../../common/component/component-base';
 import {AuthService} from '../../common/service/auth-service';
 import {CanActivate} from '@angular/router-deprecated';
-
+import {Dialog} from 'primeng/primeng';
 import {FileImporterService} from '../service/file-importer-service'; 
-import {MODAL_DIRECTIVES} from 'ng2-bs3-modal/ng2-bs3-modal';
 import {FileImportColumn} from '../service/file-import-column-model'
 import {Response} from '@angular/http';
 
@@ -23,16 +22,18 @@ import {Response} from '@angular/http';
 
 @Component({
     providers: [FileImporterService],
-    directives: [ControlMessages, FORM_DIRECTIVES, MessagePanel, MODAL_DIRECTIVES],
+    directives: [ControlMessages, FORM_DIRECTIVES, MessagePanel, Dialog],
     template: `
-
-    <modal #modal size="lg" keyboard="true" [animation]="false">
-        <modal-body>
+    
+    <p-dialog [center]="true" [resizable]="true" [height]="600" [contentHeight]="600" [width]="600" closeOnEscape="true" [closable]="true" [draggable]="true" [(visible)]="ShowSampleData" modal="modal" [showEffect]="fade">
+        <div>
         <ul>
             <li *ngFor="let s of sampleData">{{s}}</li>
         </ul>
-        </modal-body>
-    </modal>
+        </div>
+    </p-dialog>
+    
+    
 
     <form [ngFormModel]="fileImportForm">    
     <div class="container-fluid">
@@ -70,7 +71,7 @@ import {Response} from '@angular/http';
                     <option value="{{t}}" *ngFor="let t of fileImportTables">{{t}}</option>
                     </select>
                     <span class="input-group-btn">
-                    <button type="button" *ngIf="sampleData" class="btn btn-default" (click)="modal.open()">Sample</button>
+                    <button type="button" *ngIf="sampleData" class="btn btn-default" (click)="toggleSampleData();">Sample</button>
                     </span>
                 </div>
             </div>
@@ -135,7 +136,7 @@ export class FileImporter extends ComponentBase {
 
     fileImportColumns = new Array<FileImportColumn>();
 
-    showSampleData: boolean = true;
+    ShowSampleData: boolean = false;
 
     waiting: boolean = false;
     alertMessage: string;
@@ -153,11 +154,11 @@ export class FileImporter extends ComponentBase {
     tableChooser: AbstractControl;
 
     toggleSampleData() {
-        if (this.showSampleData) {
-            this.showSampleData = false;
+        if (this.ShowSampleData) {
+            this.ShowSampleData = false;
         }
         else {
-            this.showSampleData = true;
+            this.ShowSampleData = true;
         }
     }
 

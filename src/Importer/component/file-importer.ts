@@ -208,7 +208,7 @@ export class FileImporter extends ComponentBase {
                 },
                 err => {
                     this.waiting = false;
-                    
+                    console.log(err);
                     this.showError(err,'System Error Occurred');
                     
                 }

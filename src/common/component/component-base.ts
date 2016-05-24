@@ -8,6 +8,12 @@ export class ComponentBase {
             message = "Unauthorized access";
             localStorage.removeItem("id_token");
         }
+        
+        if(err._body)
+        {
+            message += "\r\n" + err._body;
+        }
+        
         alert(message);
     }
     

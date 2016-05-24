@@ -20,6 +20,8 @@ export class DataTableComponentBase extends ComponentBase {
         this.setExportString(this.getExportRowCount(dt));
         this.ClearFiltersNeeded = true;
         
+        
+        
     }
     
     getExportRowCount(dt: DataTable): number {
@@ -39,6 +41,7 @@ export class DataTableComponentBase extends ComponentBase {
     
     clearFilters(dt: DataTable){
         dt.reset();
+        dt.updatePaginator();
         this.setExportString(this.getExportRowCount(dt));
         this.ClearFiltersNeeded = false;
     }

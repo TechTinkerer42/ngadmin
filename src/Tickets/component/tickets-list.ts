@@ -22,6 +22,12 @@ import {InputText, DataTable, Column, Header, Footer, Button, ContextMenu, Dialo
     <p-dataTable #dt [value]="GridDataSource" selectionMode="single" [paginator]="true" [rows]="NumberOfGridRows" filterDelay="0" [contextMenu]="cm" 
     [globalFilter]="gb" resizableColumns="true" columnResizeMode="expand" [(selection)]="SelectedTicket" (onFilter)="filterGrid(dt)">
     <p-column [filter]="true" filterMatchMode="contains" *ngFor="let col of GridColumns" [sortable]="col.sortable" [field]="col.field" [header]="col.header" [hidden]="col.hidden" [style]="col.style">
+        <template let-col let-tickets="rowData">
+            <span style="color:red" *ngIf="showRedBackground(tickets,col)">
+                {{tickets[col.field]}}
+            </span>
+            <span *ngIf="!showRedBackground(tickets,col)">{{tickets[col.field]}}</span>
+        </template>
     </p-column>
     </p-dataTable>
         
@@ -72,8 +78,35 @@ export class TicketsList extends DataTableComponentBase implements OnInit {
         super();
     }
 
+    
+    showRedBackground(row,col){
+        
+        if(col.field == 'CallerID' || col.field == 'lngANI')
+        {
+            if(row['CallerIDUnknown'])
+            {
+                return row['CallerIDUnknown'] == 1 ? true : false;   
+            }
+            
+            return false;
+        }
+        
+        if(col.field == 'lngANI')
+        {
+            if(row['ClosingCallerIDUnknown'])
+            {
+                return row['ClosingCallerIDUnknown'] == 1 ? true : false;  
+            }
+            return false;    
+        }
+        
+        return false;
+        
+    }
+
     //absolutely need these
 
+    
     ngOnInit() {
 
         this.ContextMenuItems = [
@@ -125,10 +158,11 @@ export class TicketsList extends DataTableComponentBase implements OnInit {
 
     getGridDataSource(appNumber: Number) {
 
+        
         this.ShowLoading = true;
 
         this.ticketService.getTickets(appNumber,"0","05/23/2016","12:00AM","05/23/2016","11:59PM")
-            .map(res => <Ticket[]>res.json())
+            .map(res => res.json())
             .subscribe(mp => {
                 this.GridDataSource = mp;
                 this.setExportString(this.GridDataSource.length); //put in an event that gets the rowcount and returns it and keep one to update button too
@@ -136,7 +170,10 @@ export class TicketsList extends DataTableComponentBase implements OnInit {
             },
             err => {
                 this.ShowLoading = false;
+                this.GridDataSource = [];
+                this.setExportString(this.GridDataSource.length)
                 this.showError(err, 'Error retrieving tickets');
+                
             }
             );
     }
@@ -144,9 +181,9 @@ export class TicketsList extends DataTableComponentBase implements OnInit {
     onExport(dt: DataTable) {
 
         let hiddenColumns: string[] = (<Column[]>this.GridColumns).filter(e => e.hidden == true).map(w => w.field);
-        hiddenColumns.push("language");
-        hiddenColumns.push("promptType");
-        hiddenColumns.push("promptBehaviorType"); //hide the non friendly columns
+        hiddenColumns.push("Store_TimeZoneAdjustment");
+        hiddenColumns.push("DateOpened");
+        
 
         this.doExport(dt, hiddenColumns, this.ExportFileName);
     }

@@ -27,6 +27,7 @@ export class HttpHelper {
 
             header = new Headers({
                 'Authorization': userToken,
+                'SPP': "true",
                 'Content-Type': 'application/json'
             });
         }

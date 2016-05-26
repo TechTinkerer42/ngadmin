@@ -47,6 +47,7 @@ export class DataTableComponentBase extends ComponentBase {
     }
     
     buildContextColumns() {
+        this.ContextMenuItems = [];
         for (let c in this.GridColumns) {
             let col: Column = this.GridColumns[c];
             let icon:string = col.hidden == true ? 'fa-plus' : 'fa-minus';
@@ -89,7 +90,7 @@ export class DataTableComponentBase extends ComponentBase {
         if(rowCount > 0)
         {
             this.ShowExportButton = true;
-            this.ExportString = "Export " + rowCount.toString() + " rows";
+            this.ExportString = "Export " + rowCount.toString() + " rows (CSV)";
         }
     }
 
@@ -127,9 +128,33 @@ export class DataTableComponentBase extends ComponentBase {
         
         setTimeout(() => tempLink.click(),200); //settimeout prevents double linking
         
-        
-        
     }
+    
+    doExportMSFT(dt:DataTable,reportName:string,appNum:number,fromDate:string,fromTime:string,toDate:string,toTime:string)
+    {   let postData:any = {};
+        postData.chosenApp = appNum;
+        postData.fromDate = fromDate;
+        postData.fromTime = fromTime;
+        postData.toDate = toDate;
+        postData.toTime = toTime;
+        
+        //list of ticketnumbers    
+        
+        var dataAsString = JSON.stringify(postData);
+
+        var action = "http://localhost:8011/sppdev/TicketReports/" + reportName;
+        
+        $('<form>', {
+            "action": action,
+            "method": 'POST',
+            "target": "_blank",
+        })
+        .append("<input type='hidden' name='postData' value='" + dataAsString + "' />")
+        .appendTo(document.body).submit();
+        
+        console.log(reportName);
+    }
+    
 
     private getFirstRowReplacement(csv: string, cols: Column[]) {
         try {

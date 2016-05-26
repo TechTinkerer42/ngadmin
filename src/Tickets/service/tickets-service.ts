@@ -19,6 +19,12 @@ export class TicketService {
         return this.httpHelper.makeHttpCall('AngularAdmin/GetGridColumnsByAppID', JSON.stringify({ appID: appID,accountNumber:accountNumber }), 'POST');
     }
     
+    getEntityByType(appNumber: Number) {
+        return this.httpHelper.makeHttpCall('AngularAdmin/GetEntityByType', JSON.stringify({ appNumber: appNumber, type:"Reports"}), 'POST');
+    }
+    
+    
+    
     /*deleteMobilePrompt(promptID: number) {
         return this.httpHelper.makeHttpCall('AngularAdmin/DeleteMobilePrompt', JSON.stringify({ promptID: promptID }), 'POST');
     }

@@ -12,7 +12,7 @@ export class StateVariables {
                 result = 'http://localhost:8011/sppdev/';    
             break;
         }
-        console.log(result);
+        //console.log(result);
         return result; 
     }
 }

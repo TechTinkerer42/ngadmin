@@ -3,13 +3,14 @@ import {Component, ReflectiveInjector, OnInit, TemplateRef} from '@angular/core'
 import {UserService} from '../service/user-service';
 import {UserApplication} from '../service/user-application-model';
 import {Loading} from '../../common/component/loading'
+
 import {AuthService} from '../../common/service/auth-service';
 import {DataTableComponentBase} from '../../common/component/datatable-component-base';
 import {CanActivate} from '@angular/router-deprecated';
-import {DataTable, Column, Header, Button} from 'primeng/primeng';
+import {DataTable, Column, Header, Button,Checkbox,Dialog} from 'primeng/primeng';
 
 @Component({
-    directives: [DataTable, Column, Header, Button, Loading],
+    directives: [DataTable, Column, Header, Button, Loading,Checkbox,Dialog],
     providers: [UserService],
     template: `
     <div class="col-md-12">
@@ -28,11 +29,26 @@ import {DataTable, Column, Header, Button} from 'primeng/primeng';
         <i class="fa fa-search" style="float:left;margin:4px 4px 0 0"></i>
         <input #gb type="text" pInputText size="50" style="float:left:padding-right:20px;" placeholder="Enter Search">
         <button *ngIf="ShowExportButton" type="button" pButton icon="fa-file-excel-o" (click)="onExport(dt);" [label]="ExportString"></button>
-        
+        <button type="button" pButton icon="fa-eye" style="float:right" (click)="ShowColumnPicker=true" label="Column Visibility"></button>
         <button type="button" *ngIf="ClearFiltersNeeded" pButton icon="fa-refresh" style="float:right" (click)="clearFilters(dt);" label="Clear Filters"></button>
         </div>
     </div>
     </div>
+    
+    <p-dialog modal="true"  [center]="true" [resizable]="false" [height]="600" [contentHeight]="600" [width]="400" closeOnEscape="true" [closable]="true" [draggable]="false" [(visible)]="ShowColumnPicker" [showEffect]="fade">
+    <div class="ui-grid-col-1">
+    <p-checkbox #cball (onChange)="checkAll($event)"></p-checkbox>
+    </div>
+    <div class="ui-grid-col-11"><label class="ui-widget">{{cball.checked ? 'Select None' : 'Select All'}}</label></div>  
+    <div *ngFor="let col of GridColumns">
+        <div class="ui-grid-col-1">
+            <p-checkbox [ngModel]="!col.hidden" (onChange)="checkBoxChanged($event,col)"></p-checkbox>
+        </div>
+        <div class="ui-grid-col-11"><label class="ui-widget">{{col.header}}</label></div>    
+    </div>
+    </p-dialog>
+    
+  
     `
 })
 
@@ -47,7 +63,9 @@ import {DataTable, Column, Header, Button} from 'primeng/primeng';
 
 
 export class UserApplicationList extends DataTableComponentBase implements OnInit {
-
+    
+    whatever:boolean = false;
+    
     ExportFileName: string = "user_applications.csv";
     
     constructor(private userService: UserService) {

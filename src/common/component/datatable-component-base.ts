@@ -1,12 +1,17 @@
 import {ControlGroup} from '@angular/common';
 import {Message, DataTable, Column,MenuItem} from 'primeng/primeng';
-
 import {ComponentBase} from './component-base';
 
+import {StateVariables} from '../service/state-variables';
 
 
 export class DataTableComponentBase extends ComponentBase {
 
+    constructor() {
+     super();       
+    }
+
+    ShowColumnPicker:boolean;
     ExportString:string = "";
     ShowExportButton: boolean = false;
     ContextMenuItems: MenuItem[];
@@ -20,8 +25,21 @@ export class DataTableComponentBase extends ComponentBase {
         this.setExportString(this.getExportRowCount(dt));
         this.ClearFiltersNeeded = true;
         
-        
-        
+    }
+    
+    checkAll(checkbox){
+        if(checkbox)
+        {
+            this.GridColumns.forEach(x => x.hidden = false);
+        }
+        else{
+            this.GridColumns.forEach(x => x.hidden = true);
+        }
+    }
+    
+    checkBoxChanged(checked,col)
+    {
+        col.hidden = !checked;
     }
     
     getExportRowCount(dt: DataTable): number {
@@ -44,15 +62,13 @@ export class DataTableComponentBase extends ComponentBase {
         dt.updatePaginator();
         this.setExportString(this.getExportRowCount(dt));
         this.ClearFiltersNeeded = false;
+        
+        
     }
     
     buildContextColumns() {
         this.ContextMenuItems = [];
-        for (let c in this.GridColumns) {
-            let col: Column = this.GridColumns[c];
-            let icon:string = col.hidden == true ? 'fa-plus' : 'fa-minus';
-            this.ContextMenuItems.push({ label: col.header, icon: icon, command: (event) => this.toggleColumn(col.header, icon) });
-        }
+        
     }
     
     cloneObject(p: any): any {
@@ -101,7 +117,7 @@ export class DataTableComponentBase extends ComponentBase {
         if (dataToExport == null) {
             dataToExport = dt.value;
         }
-
+        
         let strippedRows: Column[] = _.map(dataToExport, function (row) {
             return _.omit(row, hiddenColumns);
         });
@@ -131,30 +147,48 @@ export class DataTableComponentBase extends ComponentBase {
     }
     
     doExportMSFT(dt:DataTable,reportName:string,appNum:number,fromDate:string,fromTime:string,toDate:string,toTime:string)
-    {   let postData:any = {};
+    {   
+        
+        
+        let postData:any = {};
         postData.chosenApp = appNum;
         postData.fromDate = fromDate;
         postData.fromTime = fromTime;
         postData.toDate = toDate;
         postData.toTime = toTime;
+        postData.fromNG = true;
         
-        //list of ticketnumbers    
+        let dataToExport = (<any>dt).filteredValue;
+
+        //list of ticketnumbers if filtering done
+        if (dataToExport != null) {
+            postData.ticketNumberList = dataToExport.map(x=>x.TicketNumber).toString();    
+        }
         
         var dataAsString = JSON.stringify(postData);
 
-        var action = "http://localhost:8011/sppdev/TicketReports/" + reportName;
-        
+        var action = `${StateVariables.API_ENDPOINT}` + 'TicketReports/' + reportName;
+            
+        var userToken = localStorage.getItem("id_token")
+            
         $('<form>', {
             "action": action,
             "method": 'POST',
             "target": "_blank",
         })
         .append("<input type='hidden' name='postData' value='" + dataAsString + "' />")
-        .appendTo(document.body).submit();
+        .append("<input type='hidden' name='fromNGToken' value='" + userToken + "' />")
         
-        console.log(reportName);
+        .appendTo(document.body).submit();          
+
+        
+
+        
+        
     }
     
+
+
 
     private getFirstRowReplacement(csv: string, cols: Column[]) {
         try {

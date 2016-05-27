@@ -3,14 +3,15 @@ import {MobilePromptService} from '../service/mobile-prompt-service';
 import {MobilePrompt} from '../service/mobile-prompt-model';
 import {ApplicationChooser} from '../../common/component/app-chooser'
 import {Loading} from '../../common/component/loading'
+
 import {EditMobilePrompt} from './edit-mobile-prompt';
 import {AuthService} from '../../common/service/auth-service';
 import {DataTableComponentBase} from '../../common/component/datatable-component-base';
 import {CanActivate} from '@angular/router-deprecated';
-import {InputText, DataTable, Column, Header, Footer, Button, ContextMenu, Dialog} from 'primeng/primeng';
+import {InputText, DataTable, Column, Header, Footer, Button, ContextMenu, Dialog,Checkbox} from 'primeng/primeng';
 
 @Component({
-    directives: [ApplicationChooser, EditMobilePrompt, DataTable, Column, Header, Footer, Button, ContextMenu, Dialog, Loading],
+    directives: [ApplicationChooser, EditMobilePrompt, DataTable, Column, Header, Footer, Button, ContextMenu, Dialog, Loading,Checkbox],
     providers: [MobilePromptService],
     template: `
     <div class="col-md-12">
@@ -33,14 +34,29 @@ import {InputText, DataTable, Column, Header, Footer, Button, ContextMenu, Dialo
         <button *ngIf="ShowExportButton" type="button" pButton icon="fa-file-excel-o" (click)="onExport(dt);" [label]="ExportString"></button>
         
         <button type="button" pButton icon="fa-plus" style="float:right" (click)="addPrompt();" label="Add Prompt"></button>
+        <button type="button" pButton icon="fa-eye" style="float:right" (click)="ShowColumnPicker=true" label="Column Visibility"></button>
         <button type="button" *ngIf="ClearFiltersNeeded" pButton icon="fa-refresh" style="float:right" (click)="clearFilters(dt);" label="Clear Filters"></button>
         </div>
     </div>
     
-    <p-dialog [center]="true" [resizable]="false" [height]="800" [contentHeight]="750" [width]="800" [closeOnEscape]="false" [closable]="false" [draggable]="true" [(visible)]="ShowModal" modal="modal" [showEffect]="fade">
+    <p-dialog  [center]="true" [resizable]="false" [height]="800" [contentHeight]="750" [width]="800" [closeOnEscape]="false" [closable]="false" [draggable]="true" [(visible)]="ShowModal" modal="modal" [showEffect]="fade">
     <edit-mobile-prompt [IncomingModel]="PromptModel" (onCancel)="ShowModal=false;" (onDoneEdit)="onDoneEdit($event);" (onDoneAdd)="onDoneAdd($event);"></edit-mobile-prompt>
     </p-dialog>
     </div>
+    
+    <p-dialog modal="true"  [center]="true" [resizable]="false" [height]="600" [contentHeight]="600" [width]="400" closeOnEscape="true" [closable]="true" [draggable]="false" [(visible)]="ShowColumnPicker" [showEffect]="fade">
+    <div class="ui-grid-col-1">
+    <p-checkbox #cball (onChange)="checkAll($event)"></p-checkbox>
+    </div>
+    <div class="ui-grid-col-11"><label class="ui-widget">{{cball.checked ? 'Select None' : 'Select All'}}</label></div>  
+    <div *ngFor="let col of GridColumns">
+        <div class="ui-grid-col-1">
+            <p-checkbox [ngModel]="!col.hidden" (onChange)="checkBoxChanged($event,col)"></p-checkbox>
+        </div>
+        <div class="ui-grid-col-11"><label class="ui-widget">{{col.header}}</label></div>    
+    </div>
+    </p-dialog>
+    
     `
 })
 
@@ -63,6 +79,7 @@ import {InputText, DataTable, Column, Header, Footer, Button, ContextMenu, Dialo
 
 export class MobilePromptList extends DataTableComponentBase implements OnInit {
 
+    
     SelectedApp: number = 15; //initial value
     SelectedPrompt: MobilePrompt;
     PromptModel: MobilePrompt = new MobilePrompt();

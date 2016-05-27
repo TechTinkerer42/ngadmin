@@ -11,7 +11,7 @@ export class ComponentBase {
         
         if(err._body)
         {
-            message += "\r\n" + err._body;
+            //message += "\r\n" + err._body;
         }
         
         alert(message);

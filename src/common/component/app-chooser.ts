@@ -3,6 +3,8 @@ import {Component, EventEmitter} from '@angular/core';
 
 import {CommonService} from '../service/common-service';
 
+import {ComponentBase} from '../component/component-base';
+
 @Component({
     selector: 'app-chooser',
     outputs: ['onAppChosen'],
@@ -14,19 +16,37 @@ import {CommonService} from '../service/common-service';
     </select>
     `
 })
-export class ApplicationChooser  {
+export class ApplicationChooser extends ComponentBase  {
 
-    onAppChosen: EventEmitter<string> = new EventEmitter<string>();
-
+    onAppChosen: EventEmitter<any> = new EventEmitter<any>();
+    selectedApp:number;
     applications: Array<any>;
     
     constructor(public commonService: CommonService) {
+        super();
         
         this.commonService.getApplications()
             .subscribe(res => {
                 this.applications = res;
-
-            });
+                if(this.applications.length == 0)
+                {
+                    this.onAppChosen.emit(0);    
+                }
+                else{
+                    let firstApp = this.applications[0].intUniqueApplicationNum;
+                    
+                    if(firstApp == 1)
+                    {   firstApp = 15;
+                        this.selectedApp = 15; //default to demo
+                    }
+                    
+                    this.onAppChosen.emit(firstApp);
+            }},
+                 err => {
+                this.showError(err, 'Error retrieving reports');
+            }
+                 
+            );
     }
     
   

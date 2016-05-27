@@ -3,20 +3,22 @@ import {TicketService} from '../service/tickets-service';
 import {Ticket} from '../service/ticket-model';
 import {ApplicationChooser} from '../../common/component/app-chooser'
 import {Loading} from '../../common/component/loading'
+
+
+
 import {AuthService} from '../../common/service/auth-service';
 import {DataTableComponentBase} from '../../common/component/datatable-component-base';
 import {CanActivate} from '@angular/router-deprecated';
-import {InputText, DataTable, Column, Header, Footer, Button, ContextMenu, Dialog, SplitButton, SplitButtonItem} from 'primeng/primeng';
-
+import {InputText, DataTable, Column, Header, Footer, Button, ContextMenu, Dialog, SplitButton, SplitButtonItem,Checkbox} from 'primeng/primeng';
 
 
 
 @Component({
-    directives: [ApplicationChooser, DataTable, Column, Header, Footer, Button, ContextMenu, Dialog, Loading, SplitButton, SplitButtonItem],
+    directives: [ApplicationChooser, DataTable, Column, Header, Footer, Button, ContextMenu, Dialog, Loading, SplitButton, SplitButtonItem,Checkbox],
     providers: [TicketService],
     template: `
     
-    <loading LoadingMessage="Loading..." [ShowLoading]="ShowLoading"></loading>
+    <loading LoadingMessage="Loading tickets..." [ShowLoading]="ShowLoading"></loading>
     
     <div class="row">
     
@@ -33,11 +35,12 @@ import {InputText, DataTable, Column, Header, Footer, Button, ContextMenu, Dialo
         </div>
     
         <div class="col-md-11">
-            <app-chooser [selectedApp]="SelectedApp" (onAppChosen)="onAppChosen($event,dt)">Loading...</app-chooser>
+        
+            <app-chooser (onAppChosen)="onAppChosen($event,dt)">Loading...</app-chooser>
             <br>
             
             <p-contextMenu #cm [model]="ContextMenuItems"></p-contextMenu>
-            <p-dataTable #dt [value]="GridDataSource" selectionMode="single" [paginator]="true" [rows]="NumberOfGridRows" filterDelay="0" [contextMenu]="cm" 
+            <p-dataTable #dt [value]="GridDataSource" selectionMode="single" [paginator]="true" [rows]="NumberOfGridRows" filterDelay="500" [contextMenu]="cm" 
             [globalFilter]="gb" resizableColumns="true" columnResizeMode="expand" [(selection)]="SelectedTicket" (onFilter)="filterGrid(dt)" [rowsPerPageOptions]="[10,20,30]">
             <p-column [filter]="true" filterMatchMode="contains" *ngFor="let col of GridColumns" [sortable]="col.sortable" [field]="col.field" [header]="col.header" [hidden]="col.hidden" [style]="col.style">
                 <template let-col let-tickets="rowData">
@@ -62,7 +65,7 @@ import {InputText, DataTable, Column, Header, Footer, Button, ContextMenu, Dialo
                     <p-splitButtonItem *ngFor="let rep of ReportList" icon="fa-file-excel-o" [label]="rep.ConfigText" (onClick)="onExport(dt,rep.ConfigValue)"></p-splitButtonItem>
                 </p-splitButton>
                 
-                
+                <button type="button" pButton icon="fa-eye" style="float:right" (click)="ShowColumnPicker=true" label="Column Visibility"></button>
                 <button type="button" *ngIf="ClearFiltersNeeded" pButton icon="fa-refresh" style="float:right" (click)="clearFilters(dt);" label="Clear Filters"></button>
                 </div>
             </div>
@@ -71,8 +74,18 @@ import {InputText, DataTable, Column, Header, Footer, Button, ContextMenu, Dialo
     
     <p-dialog [center]="true" [resizable]="false" [height]="800" [contentHeight]="750" [width]="800" [closeOnEscape]="false" [closable]="false" [draggable]="true" [(visible)]="ShowModal" modal="modal" [showEffect]="fade"></p-dialog>
 
-     
-    
+    <p-dialog modal="true"  [center]="true" [resizable]="false" [height]="600" [contentHeight]="600" [width]="400" closeOnEscape="true" [closable]="true" [draggable]="false" [(visible)]="ShowColumnPicker" [showEffect]="fade">
+    <div class="ui-grid-col-1">
+    <p-checkbox #cball (onChange)="checkAll($event)"></p-checkbox>
+    </div>
+    <div class="ui-grid-col-11"><label class="ui-widget">{{cball.checked ? 'Select None' : 'Select All'}}</label></div>  
+    <div *ngFor="let col of GridColumns">
+        <div class="ui-grid-col-1">
+            <p-checkbox [ngModel]="!col.hidden" (onChange)="checkBoxChanged($event,col)"></p-checkbox>
+        </div>
+        <div class="ui-grid-col-11"><label class="ui-widget">{{col.header}}</label></div>    
+    </div>
+    </p-dialog>
     `
 })
 
@@ -99,13 +112,11 @@ export class TicketsList extends DataTableComponentBase implements OnInit {
     fromTime;
     toDate;
     toTime;
-
-    SelectedApp: number = 16; //initial value
+    SelectedApp: number = 0; //initial value
     SelectedTicket: Ticket;
     TicketModel: Ticket = new Ticket();
     ShowModal: boolean = false;
     ExportFileName: string = "ticket_export.csv";
-
     ReportList: any[] = [];
 
     constructor(private ticketService: TicketService) {
@@ -114,7 +125,6 @@ export class TicketsList extends DataTableComponentBase implements OnInit {
 
 
     }
-
 
     showRedBackground(row, col) {
 
@@ -145,17 +155,7 @@ export class TicketsList extends DataTableComponentBase implements OnInit {
         this.ContextMenuItems = [
             { label: 'Edit Ticket', icon: 'fa-edit', command: (event) => this.editTicket() },
             { label: 'Delete Ticket', icon: 'fa-close', command: (event) => this.deleteTicket() }
-
         ];
-
-        this.setupDateTimeBoxes();
-
-        this.getGridColumns(this.SelectedApp, "0");
-
-        this.getReports();
-
-
-
     }
 
     setupDateTimeBoxes() {
@@ -218,7 +218,7 @@ export class TicketsList extends DataTableComponentBase implements OnInit {
     }
 
     getReports(){
-        this.ticketService.getEntityByType(this.SelectedApp)
+        this.ticketService.getEntityByType(this.SelectedApp,"0", 0)
             .map(res => res.json())
             .subscribe(reports => {
                 console.log(reports);
@@ -259,9 +259,9 @@ export class TicketsList extends DataTableComponentBase implements OnInit {
         this.ticketService.getGridColumnsByAppID(appNumber, accountNumber)
             .map(res => res.json())
             .subscribe(cols => {
-                //console.log(cols);
+                console.log(cols);
                 this.buildColumns(cols);
-                this.buildContextColumns();
+                
 
             },
             err => {
@@ -281,6 +281,7 @@ export class TicketsList extends DataTableComponentBase implements OnInit {
                 this.GridDataSource = mp;
                 this.setExportString(this.GridDataSource.length); //put in an event that gets the rowcount and returns it and keep one to update button too
                 this.ShowLoading = false;
+                
             },
             err => {
                 this.ShowLoading = false;
@@ -299,14 +300,16 @@ export class TicketsList extends DataTableComponentBase implements OnInit {
             let hiddenColumns: string[] = (<Column[]>this.GridColumns).filter(e => e.hidden == true).map(w => w.field);
             hiddenColumns.push("Store_TimeZoneAdjustment");
             hiddenColumns.push("DateOpened");
-
+            hiddenColumns.push("RowNumber");
+            hiddenColumns.push("TotalRows");
+            hiddenColumns.push("ClosingCallerIDUnknown");
+            hiddenColumns.push("CallerIDUnknown");
+            
             this.doExport(dt, hiddenColumns, this.ExportFileName);    
         }
         else{
             this.doExportMSFT(dt,reportName,this.SelectedApp,this.fromDate.val(),this.fromTime.val(),this.toDate.val(),this.toTime.val());
         }
-
-
         
     }
 
@@ -358,18 +361,33 @@ export class TicketsList extends DataTableComponentBase implements OnInit {
 
         this.ShowModal = false;
 
-        var foundPrompt = this.GridDataSource.filter(x => x.promptID == changedRow.promptID);
+        //var foundPrompt = this.GridDataSource.filter(x => x.promptID == changedRow.promptID);
 
-        if (foundPrompt[0]) {
-            this.GridDataSource[this.GridDataSource.indexOf(foundPrompt[0])] = changedRow;
-        }
+        //if (foundPrompt[0]) {
+          //  this.GridDataSource[this.GridDataSource.indexOf(foundPrompt[0])] = changedRow;
+        //}
     }
 
     onAppChosen(appNumber: number, dt: DataTable) {
-        dt.reset();
-        this.SelectedApp = appNumber;
-        this.setupDateTimeBoxes();
-        this.getReports();
-        this.getGridColumns(this.SelectedApp, "0");
+        
+        if(appNumber == 0)
+        {
+            alert('User has no applications associated with their profile');    
+        }
+        else{
+            dt.reset();
+            this.GridDataSource = [];
+            this.setExportString(this.GridDataSource.length);
+            this.SelectedApp = appNumber;
+            this.setupDateTimeBoxes();
+            this.getReports();
+            
+            this.getGridColumns(appNumber, "0");
+        }
+        
+        
+        
+        
+        
     }
 }

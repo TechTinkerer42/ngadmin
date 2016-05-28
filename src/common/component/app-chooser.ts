@@ -24,7 +24,7 @@ export class ApplicationChooser extends ComponentBase  {
     
     constructor(public commonService: CommonService) {
         super();
-        
+                
         this.commonService.getApplications()
             .subscribe(res => {
                 this.applications = res;

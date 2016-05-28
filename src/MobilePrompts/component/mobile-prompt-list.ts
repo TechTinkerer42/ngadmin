@@ -93,7 +93,7 @@ export class MobilePromptList extends DataTableComponentBase implements OnInit {
     //absolutely need these
 
     ngOnInit() {
-
+                
         this.ContextMenuItems = [
             { label: 'Edit Prompt', icon: 'fa-edit', command: (event) => this.editPrompt() },
             { label: 'Delete Prompt', icon: 'fa-close', command: (event) => this.deleteMobilePrompt() }
@@ -123,8 +123,6 @@ export class MobilePromptList extends DataTableComponentBase implements OnInit {
     }
 
     getGridDataSource(appNumber: Number) {
-
-        this.ShowLoading = true;
 
         this.mobilePromptService.getMobilePrompts(appNumber)
             .map(res => <MobilePrompt[]>res.json())
@@ -206,6 +204,7 @@ export class MobilePromptList extends DataTableComponentBase implements OnInit {
     }
     
     onAppChosen(appNumber: number, dt: DataTable) {
+        this.ShowLoading = true;
         dt.reset();
         this.SelectedApp = appNumber;
         this.getGridDataSource(appNumber); //initial data load

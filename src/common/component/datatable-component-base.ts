@@ -19,7 +19,6 @@ export class DataTableComponentBase extends ComponentBase {
     GridColumns: any[];
     GridDataSource:any[];
     NumberOfGridRows: number = 20;
-    ShowLoading:boolean = false;
     
     filterGrid(dt: DataTable) {
         this.setExportString(this.getExportRowCount(dt));

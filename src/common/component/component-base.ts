@@ -3,6 +3,9 @@ import {Message, DataTable, Column} from 'primeng/primeng';
 
 export class ComponentBase {
 
+    ShowLoading:boolean = false;
+    
+
     showError(err: any, message: string = '') {
         if (err.status == "403") {
             message = "Unauthorized access";

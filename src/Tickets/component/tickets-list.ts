@@ -17,9 +17,6 @@ import {InputText, DataTable, Column, Header, Footer, Button, ContextMenu, Dialo
     directives: [ApplicationChooser, DataTable, Column, Header, Footer, Button, ContextMenu, Dialog, Loading, SplitButton, SplitButtonItem,Checkbox],
     providers: [TicketService],
     template: `
-    
-    <loading LoadingMessage="Loading tickets..." [ShowLoading]="ShowLoading"></loading>
-    
     <div class="row">
     
         <div class="col-md-1">
@@ -31,7 +28,7 @@ import {InputText, DataTable, Column, Header, Footer, Button, ContextMenu, Dialo
         <input type="text" class="form-control" id="toDate" value=""/> 
         <input type="text" class="form-control" id="toTime" value="12:00am" /> 
         <br>
-        <button type="button" pButton icon="fa-search" (click)="getGridDataSource();" label="Search"></button>
+        <button type="button" pButton icon="fa-search" (click)="doSearch(dt);" label="Search"></button>
         </div>
     
         <div class="col-md-11">
@@ -40,7 +37,7 @@ import {InputText, DataTable, Column, Header, Footer, Button, ContextMenu, Dialo
             <br>
             
             <p-contextMenu #cm [model]="ContextMenuItems"></p-contextMenu>
-            <p-dataTable #dt [value]="GridDataSource" selectionMode="single" [paginator]="true" [rows]="NumberOfGridRows" filterDelay="500" [contextMenu]="cm" 
+            <p-dataTable #dt [value]="GridDataSource" selectionMode="single" [paginator]="true" [rows]="NumberOfGridRows" filterDelay="0" [contextMenu]="cm" 
             [globalFilter]="gb" resizableColumns="true" columnResizeMode="expand" [(selection)]="SelectedTicket" (onFilter)="filterGrid(dt)" [rowsPerPageOptions]="[10,20,30]">
             <p-column [filter]="true" filterMatchMode="contains" *ngFor="let col of GridColumns" [sortable]="col.sortable" [field]="col.field" [header]="col.header" [hidden]="col.hidden" [style]="col.style">
                 <template let-col let-tickets="rowData">
@@ -74,7 +71,7 @@ import {InputText, DataTable, Column, Header, Footer, Button, ContextMenu, Dialo
     
     <p-dialog [center]="true" [resizable]="false" [height]="800" [contentHeight]="750" [width]="800" [closeOnEscape]="false" [closable]="false" [draggable]="true" [(visible)]="ShowModal" modal="modal" [showEffect]="fade"></p-dialog>
 
-    <p-dialog modal="true"  [center]="true" [resizable]="false" [height]="600" [contentHeight]="600" [width]="400" closeOnEscape="true" [closable]="true" [draggable]="false" [(visible)]="ShowColumnPicker" [showEffect]="fade">
+    <p-dialog modal="true"  [center]="true" [resizable]="false" [height]="700" [contentHeight]="700" [width]="400" closeOnEscape="true" [closable]="true" [draggable]="false" [(visible)]="ShowColumnPicker" [showEffect]="fade">
     <div class="ui-grid-col-1">
     <p-checkbox #cball (onChange)="checkAll($event)"></p-checkbox>
     </div>
@@ -86,6 +83,8 @@ import {InputText, DataTable, Column, Header, Footer, Button, ContextMenu, Dialo
         <div class="ui-grid-col-11"><label class="ui-widget">{{col.header}}</label></div>    
     </div>
     </p-dialog>
+    <loading LoadingMessage="Loading..." [ShowLoading]="ShowLoading"></loading>
+    
     `
 })
 
@@ -148,10 +147,16 @@ export class TicketsList extends DataTableComponentBase implements OnInit {
     }
 
     //absolutely need these
-
+    doSearch(dt:DataTable)
+    {
+        //console.log('searching');
+        dt.reset();
+        this.getGridDataSource();
+        this.setExportString(this.GridDataSource.length);
+    }
 
     ngOnInit() {
-
+        this.ShowLoading = true;
         this.ContextMenuItems = [
             { label: 'Edit Ticket', icon: 'fa-edit', command: (event) => this.editTicket() },
             { label: 'Delete Ticket', icon: 'fa-close', command: (event) => this.deleteTicket() }

@@ -17,6 +17,7 @@ export class DataTableComponentBase extends ComponentBase {
     ContextMenuItems: MenuItem[];
     ClearFiltersNeeded:boolean = false;
     GridColumns: any[];
+    SavedColumns: any[];
     GridDataSource:any[];
     NumberOfGridRows: number = 20;
     
@@ -26,7 +27,36 @@ export class DataTableComponentBase extends ComponentBase {
         
     }
     
-    checkAll(checkbox){
+    checkColumnVisibility(col) : boolean
+    {
+        let temp:any = this.SavedColumns.filter(y=>y.field == col.columnName);
+        if(temp.length > 0)
+        {
+            return temp[0].hidden;
+        }
+        return true;
+    }
+    
+    getSavedColumnVisibility(id){
+        let uName:string = localStorage.getItem("u_name");
+        let storageName:string = "grid_columns_" + uName + "_" + id;
+        let gCols = localStorage.getItem(storageName);
+        
+        if(gCols != null)
+        {
+            return JSON.parse(gCols);
+        }
+        
+        return null;
+    }
+    
+    saveColumnVisibility(id){
+        let uName:string = localStorage.getItem("u_name");
+        let storageName:string = "grid_columns_" + uName + "_" + id;
+        localStorage.setItem(storageName,JSON.stringify(this.GridColumns));
+    }
+    
+    checkAll(checkbox,id){
         if(checkbox)
         {
             this.GridColumns.forEach(x => x.hidden = false);
@@ -34,11 +64,13 @@ export class DataTableComponentBase extends ComponentBase {
         else{
             this.GridColumns.forEach(x => x.hidden = true);
         }
+        this.saveColumnVisibility(id);
     }
     
-    checkBoxChanged(checked,col)
+    checkBoxChanged(checked,col,id)
     {
         col.hidden = !checked;
+        this.saveColumnVisibility(id);
     }
     
     getExportRowCount(dt: DataTable): number {

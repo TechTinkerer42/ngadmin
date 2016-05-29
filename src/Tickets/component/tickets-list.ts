@@ -72,15 +72,19 @@ import {InputText, DataTable, Column, Header, Footer, Button, ContextMenu, Dialo
     <p-dialog [center]="true" [resizable]="false" [height]="800" [contentHeight]="750" [width]="800" [closeOnEscape]="false" [closable]="false" [draggable]="true" [(visible)]="ShowModal" modal="modal" [showEffect]="fade"></p-dialog>
 
     <p-dialog modal="true"  [center]="true" [resizable]="false" [height]="700" [contentHeight]="700" [width]="400" closeOnEscape="true" [closable]="true" [draggable]="false" [(visible)]="ShowColumnPicker" [showEffect]="fade">
-    <div class="ui-grid-col-1">
-    <p-checkbox #cball (onChange)="checkAll($event)"></p-checkbox>
-    </div>
-    <div class="ui-grid-col-11"><label class="ui-widget">{{cball.checked ? 'Select None' : 'Select All'}}</label></div>  
-    <div *ngFor="let col of GridColumns">
-        <div class="ui-grid-col-1">
-            <p-checkbox [ngModel]="!col.hidden" (onChange)="checkBoxChanged($event,col)"></p-checkbox>
+    <div class="container">
+        <div class="row">
+            <div class="ui-grid-col-1">
+            <p-checkbox #cball (onChange)="checkAll($event,SelectedApp)"></p-checkbox>
+            </div>
+            <div class="ui-grid-col-11"><label class="ui-widget">{{cball.checked ? 'Select None' : 'Select All'}}</label></div>  
+            <div *ngFor="let col of GridColumns">
+                <div class="ui-grid-col-1">
+                    <p-checkbox [ngModel]="!col.hidden" (onChange)="checkBoxChanged($event,col,SelectedApp)"></p-checkbox>
+                </div>
+                <div class="ui-grid-col-11"><label class="ui-widget">{{col.header}}</label></div>    
+            </div>
         </div>
-        <div class="ui-grid-col-11"><label class="ui-widget">{{col.header}}</label></div>    
     </div>
     </p-dialog>
     <loading LoadingMessage="Loading..." [ShowLoading]="ShowLoading"></loading>
@@ -106,7 +110,6 @@ import {InputText, DataTable, Column, Header, Footer, Button, ContextMenu, Dialo
 
 
 export class TicketsList extends DataTableComponentBase implements OnInit {
-
     fromDate;
     fromTime;
     toDate;
@@ -161,6 +164,9 @@ export class TicketsList extends DataTableComponentBase implements OnInit {
             { label: 'Edit Ticket', icon: 'fa-edit', command: (event) => this.editTicket() },
             { label: 'Delete Ticket', icon: 'fa-close', command: (event) => this.deleteTicket() }
         ];
+        
+        
+        
     }
 
     setupDateTimeBoxes() {
@@ -239,6 +245,8 @@ export class TicketsList extends DataTableComponentBase implements OnInit {
 
     buildColumns(cols: any[]) {
 
+        this.SavedColumns = this.getSavedColumnVisibility(this.SelectedApp);
+        
         this.GridColumns = [];
 
         cols.forEach(x => {
@@ -247,7 +255,12 @@ export class TicketsList extends DataTableComponentBase implements OnInit {
             if (x.columnVisibility == 'hidden') {
                 hidden = true;
             }
-
+            
+            if(this.SavedColumns) //check to see what we have 
+            {
+                hidden = this.checkColumnVisibility(x); 
+            }
+            
             this.GridColumns.push({ field: x.columnName, header: x.columnTitle, sortable: true, hidden: hidden, style: { "width": x.columnWidth } });
 
         })
@@ -264,7 +277,7 @@ export class TicketsList extends DataTableComponentBase implements OnInit {
         this.ticketService.getGridColumnsByAppID(appNumber, accountNumber)
             .map(res => res.json())
             .subscribe(cols => {
-                console.log(cols);
+                
                 this.buildColumns(cols);
                 
 

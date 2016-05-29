@@ -7,7 +7,7 @@ import {ValidationService} from '../../common/service/validation-service';
 import {ComponentBase} from '../../common/component/component-base';
 import {LoginService} from '../service/login-service';
 import {AuthService} from '../../common/service/auth-service';
-
+import {JwtHelper} from 'angular2-jwt';
 import {appInjector} from '../../common/service/app-injector';
 
 @Component({
@@ -64,7 +64,7 @@ export class LoginComponent extends ComponentBase implements OnInit {
     waiting: boolean = false; 
     alertMessage: string;
     alertType: string;
-
+    jwtHelper: JwtHelper = new JwtHelper();
     //controls
     loginForm: ControlGroup;
     userName: AbstractControl;
@@ -75,8 +75,6 @@ export class LoginComponent extends ComponentBase implements OnInit {
         this.buildForm();
         if(this.authService.isTokenValid())
         {
-            //navigate to admin page immediated
-            
             this.authService.navigateTo('/Admin/AdminHome');
             
             //this.alertType = "info";
@@ -88,13 +86,16 @@ export class LoginComponent extends ComponentBase implements OnInit {
     
     buildForm() {
         
-        let storedUserName = localStorage.getItem('username');
+        let storedUserName = localStorage.getItem('u_name');
+        let rem_me = localStorage.getItem('rem_me');
+        
         let rememberMeChecked = false;
-        if(storedUserName == null)
+        if(rem_me == null)
         {
             storedUserName = "";
         }
         else{
+            storedUserName = storedUserName;
             rememberMeChecked = true;
         }
         this.alertMessage = '';
@@ -128,14 +129,16 @@ export class LoginComponent extends ComponentBase implements OnInit {
                 
                 if(this.rememberMe.value)
                 {
-                   localStorage.setItem('username',formData.userName);    
+                   localStorage.setItem('u_name',formData.userName);
+                   localStorage.setItem('rem_me',"yes");    
                 }
                 else{
-                    localStorage.removeItem('username');
+                    localStorage.removeItem('rem_me');
                 }
                 
                 
                 localStorage.setItem('id_token',mp.token);
+                
                 this.waiting = false;
                 
                 this.authService.navigateTo('/Admin');

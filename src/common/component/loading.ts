@@ -8,8 +8,8 @@ import {Dialog} from 'primeng/primeng';
     inputs: ['LoadingMessage','ShowLoading'],
     directives:[Dialog],
     template: `
-    <p-dialog header="" modal="true" [center]="true" [resizable]="false" [height]="100" [contentHeight]="100" [width]="200" closeOnEscape="false" [closable]="false" [draggable]="false" [visible]="ShowLoading" [showEffect]="fade">
-    <div class="text-center" style="font-size:16px;"><br><i class='fa fa-spinner fa-spin'></i> {{LoadingMessage}}</div>
+    <p-dialog header="{{LoadingMessage}}" modal="true" [center]="true" [resizable]="false" [height]="100" [contentHeight]="100" [width]="200" closeOnEscape="false" [closable]="false" [draggable]="false" [visible]="ShowLoading" [showEffect]="fade">
+    <div class="text-center" style="font-size:16px;"><i class='fa fa-spinner fa-spin fa-3x'></i></div>
     </p-dialog>
     `
 })

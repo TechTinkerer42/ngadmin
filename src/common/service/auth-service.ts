@@ -32,6 +32,8 @@ export class AuthService {
             }
             else {
                 console.log('token NOT expired');
+                //set localstorage userid
+                
             }
         }
         else {
@@ -40,6 +42,8 @@ export class AuthService {
             isValid = false;
             
         }
+        
+        
         
         return isValid;
     }

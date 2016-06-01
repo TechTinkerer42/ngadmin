@@ -1,4 +1,5 @@
 import {ControlGroup} from '@angular/common';
+import {ViewChild} from '@angular/core';
 import {Message, DataTable, Column,MenuItem} from 'primeng/primeng';
 import {ComponentBase} from './component-base';
 
@@ -11,18 +12,20 @@ export class DataTableComponentBase extends ComponentBase {
      super();       
     }
 
+    @ViewChild(DataTable) dt:DataTable; //only available after ngAfterViewInit and has to be on the parent grid
+
     ShowColumnPicker:boolean;
     ExportString:string = "";
     ShowExportButton: boolean = false;
     ContextMenuItems: MenuItem[];
     ClearFiltersNeeded:boolean = false;
-    GridColumns: any[];
+    GridColumns: any[] = [];
     SavedColumns: any[]; //keeps track of the saved columns
     GridDataSource:any[];
     NumberOfGridRows: number = 20;
     
-    filterGrid(dt: DataTable) {
-        this.setExportString(this.getExportRowCount(dt));
+    filterGrid() {
+        this.setExportString(this.getExportRowCount());
         this.ClearFiltersNeeded = true;
         
     }
@@ -73,25 +76,25 @@ export class DataTableComponentBase extends ComponentBase {
         this.saveColumnVisibility(id);
     }
     
-    getExportRowCount(dt: DataTable): number {
+    getExportRowCount(): number {
         
         let rowCount:number = 0;
         
-        let filteredData = (<any>dt).filteredValue;
+        let filteredData = (<any>this.dt).filteredValue;
         if (filteredData != null) {
             rowCount = filteredData.length;
         }
         else {
-            rowCount = (<any>dt).value.length;
+            rowCount = (<any>this.dt).value.length;
         }
         
         return rowCount;
     }
     
-    clearFilters(dt: DataTable){
-        dt.reset();
-        dt.updatePaginator();
-        this.setExportString(this.getExportRowCount(dt));
+    clearFilters(){
+        this.dt.reset();
+        this.dt.updatePaginator();
+        this.setExportString(this.getExportRowCount());
         this.ClearFiltersNeeded = false;
         
         
@@ -137,12 +140,12 @@ export class DataTableComponentBase extends ComponentBase {
         }
     }
 
-    doExport(dt: DataTable, hiddenColumns,filename: string) {
+    doExport(hiddenColumns,filename: string) {
 
-        let dataToExport = (<any>dt).filteredValue;
+        let dataToExport = (<any>this.dt).filteredValue;
 
         if (dataToExport == null) {
-            dataToExport = dt.value;
+            dataToExport = this.dt.value;
         }
         
         let strippedRows: Column[] = _.map(dataToExport, function (row) {
@@ -173,7 +176,7 @@ export class DataTableComponentBase extends ComponentBase {
         
     }
     
-    doExportMSFT(dt:DataTable,reportName:string,appNum:number,fromDate:string,fromTime:string,toDate:string,toTime:string)
+    doExportMSFT(reportName:string,appNum:number,fromDate:string,fromTime:string,toDate:string,toTime:string)
     {   
         
         
@@ -185,7 +188,7 @@ export class DataTableComponentBase extends ComponentBase {
         postData.toTime = toTime;
         postData.fromNG = true;
         
-        let dataToExport = (<any>dt).filteredValue;
+        let dataToExport = (<any>this.dt).filteredValue;
 
         //list of ticketnumbers if filtering done
         if (dataToExport != null) {

@@ -1,4 +1,4 @@
-﻿import {Component, ReflectiveInjector, OnInit, TemplateRef} from '@angular/core'
+﻿import {Component, ReflectiveInjector, OnInit} from '@angular/core'
 import {TicketService} from '../service/tickets-service';
 import {Ticket} from '../service/ticket-model';
 import {AppAccountLOBChooser} from '../../common/component/app-account-lob-chooser'
@@ -17,8 +17,8 @@ import {Router} from '@angular/router-deprecated';
     directives: [AppAccountLOBChooser, DataTable, Column, Header, Footer, Button, ContextMenu, Dialog, Loading, SplitButton, SplitButtonItem, Checkbox],
     providers: [TicketService],
     template: `
-    <p-dialog header="Choose Application:" [center]="true" [resizable]="false" [height]="300" [contentHeight]="300" [width]="500" [closeOnEscape]="true" [closable]="true" [draggable]="false" [(visible)]="ShowAppChanger" modal="modal" [showEffect]="fade">
-            <app-account-lob-chooser (onClose)="onClose($event)" (onValueChosen)="onValueChosen($event,dt)">Loading...</app-account-lob-chooser>
+    <p-dialog (onAfterHide)="onAppChooserHidden()" header="Choose Application:" [center]="true" [resizable]="false" [height]="300" [contentHeight]="300" [width]="500" [closeOnEscape]="true" [closable]="true" [draggable]="false" [(visible)]="ShowAppChanger" modal="modal" [showEffect]="fade">
+            <app-account-lob-chooser (onValueChosen)="onValueChosen($event)">Loading...</app-account-lob-chooser>
     </p-dialog>
     
     <div class="row" [hidden]="!ShowTicketsScreen">
@@ -41,7 +41,7 @@ import {Router} from '@angular/router-deprecated';
         <input type="text" class="form-control" id="toDate" value=""/> 
         <input type="text" class="form-control" id="toTime" value="12:00am" /> 
         <br>
-        <button type="button" pButton icon="fa-search" (click)="doSearch(dt);" label="Search"></button>
+        <button type="button" pButton icon="fa-search" (click)="doSearch();" label="Search"></button>
         </div>
     
         
@@ -50,8 +50,8 @@ import {Router} from '@angular/router-deprecated';
             
             
             <p-contextMenu #cm [model]="ContextMenuItems"></p-contextMenu>
-            <p-dataTable #dt [value]="GridDataSource" selectionMode="single" [paginator]="true" [rows]="NumberOfGridRows" filterDelay="0" [contextMenu]="cm" 
-            [globalFilter]="gb" resizableColumns="true" columnResizeMode="expand" [(selection)]="SelectedTicket" (onFilter)="filterGrid(dt)" [rowsPerPageOptions]="[10,20,30]">
+            <p-dataTable *ngIf="GridColumns.length > 0" #dt [value]="GridDataSource" selectionMode="single" [paginator]="true" [rows]="NumberOfGridRows" filterDelay="0" [contextMenu]="cm" 
+            [globalFilter]="gb" resizableColumns="true" columnResizeMode="expand" [(selection)]="SelectedTicket" (onFilter)="filterGrid()" [rowsPerPageOptions]="[10,20,30]">
             <p-column [filter]="true" filterMatchMode="contains" *ngFor="let col of GridColumns" [sortable]="col.sortable" [field]="col.field" [header]="col.header" [hidden]="col.hidden" [style]="col.style">
                 <template let-col let-tickets="rowData">
                     <span title="Unknown caller ID" style="color:red" *ngIf="showRedBackground(tickets,col) && CallerIDChecking">
@@ -70,14 +70,14 @@ import {Router} from '@angular/router-deprecated';
                 <input #gb type="text" pInputText size="50" style="float:left:padding-right:20px;" placeholder="Enter Search">
                 
                 
-                <button *ngIf="ShowExportButton && ReportList.length == 0" type="button" pButton icon="fa-file-excel-o" (click)="onExport(dt);" [label]="ExportString"></button>
+                <button *ngIf="ShowExportButton && ReportList.length == 0" type="button" pButton icon="fa-file-excel-o" (click)="onExport();" [label]="ExportString"></button>
                 
-                <p-splitButton *ngIf="ShowExportButton && ReportList.length > 0" [label]="ExportString" icon="fa-file-excel-o" (onClick)="onExport(dt)">
-                    <p-splitButtonItem *ngFor="let rep of ReportList" icon="fa-file-excel-o" [label]="rep.ConfigText" (onClick)="onExport(dt,rep.ConfigValue)"></p-splitButtonItem>
+                <p-splitButton *ngIf="ShowExportButton && ReportList.length > 0" [label]="ExportString" icon="fa-file-excel-o" (onClick)="onExport()">
+                    <p-splitButtonItem *ngFor="let rep of ReportList" icon="fa-file-excel-o" [label]="rep.ConfigText" (onClick)="onExport(rep.ConfigValue)"></p-splitButtonItem>
                 </p-splitButton>
                 
                 <button type="button" pButton icon="fa-eye" style="float:right" (click)="ShowColumnPicker=true" label="Column Visibility"></button>
-                <button type="button" *ngIf="ClearFiltersNeeded" pButton icon="fa-refresh" style="float:right" (click)="clearFilters(dt);" label="Clear Filters"></button>
+                <button type="button" *ngIf="ClearFiltersNeeded" pButton icon="fa-refresh" style="float:right" (click)="clearFilters();" label="Clear Filters"></button>
                 </div>
             </div>
         </div>
@@ -144,6 +144,9 @@ export class TicketsList extends DataTableComponentBase implements OnInit {
     NoRecordsMessage:string;
     LogoImage:string = "SPPLogo_Mobile.jpg";
 
+    
+
+
     constructor(private ticketService: TicketService) {
         super();
 
@@ -157,8 +160,10 @@ export class TicketsList extends DataTableComponentBase implements OnInit {
             { label: 'Edit Ticket', icon: 'fa-edit', command: (event) => this.editTicket() },
             { label: 'Delete Ticket', icon: 'fa-close', command: (event) => this.deleteTicket() }
         ];
+        
     }
     
+   
     showRedBackground(row, col) {
         if (col.field == 'CallerID') {
             if (row['CallerIDUnknown']) {
@@ -176,9 +181,7 @@ export class TicketsList extends DataTableComponentBase implements OnInit {
         return false;
     }
 
-    //absolutely need these
-    doSearch(dt: DataTable) {
-        dt.reset();
+    doSearch() {
         this.ShowLoading = true;
         this.getGridDataSource();
         this.setExportString(this.GridDataSource.length);
@@ -253,6 +256,7 @@ export class TicketsList extends DataTableComponentBase implements OnInit {
             err => {
                 this.ShowLoading = false;
                 this.showError(err, 'Error retrieving reports');
+                this.goHome();
             }
             );
     }
@@ -276,13 +280,15 @@ export class TicketsList extends DataTableComponentBase implements OnInit {
             },
             err => {
                 this.ShowLoading = false;
-                this.showError(err, 'Error retrieving reports');
+                this.showError(err, 'Error retrieving logo');
+                this.goHome();
             }
             );
     }
 
 
     buildColumns(cols: any[]) {
+
 
         //get the list of saved columns from the local storage
         this.SavedColumns = this.getSavedColumnVisibility(this.SelectedApp);
@@ -329,19 +335,28 @@ export class TicketsList extends DataTableComponentBase implements OnInit {
                 }
                 else{
                     this.ShowLoading = false;
+                    this.ShowTicketsScreen = false;
                     alert('Grid columns not setup for this account!');
+                    this.goHome();
                 }
             },
             err => {
                 this.ShowLoading = false;
+                this.ShowTicketsScreen = false;
                 this.showError(err, 'Error retrieving grid columns');
+                this.goHome();
             }
             );
     }
 
+    goHome()
+    {
+        window.location.replace("/");
+    }
 
     getGridDataSource() {
         this.NoRecordsMessage = '';
+        
 
         this.ticketService.getTickets(this.SelectedApp,this.SelectedCustomerNumber,this.SelectedAccount, this.SelectedBusinessLine,this.fromDate.val(), this.fromTime.val(), this.toDate.val(), this.toTime.val())
             .map(res => res.json())
@@ -349,6 +364,7 @@ export class TicketsList extends DataTableComponentBase implements OnInit {
                 this.GridDataSource = mp;
                 this.setExportString(this.GridDataSource.length); //put in an event that gets the rowcount and returns it and keep one to update button too
                 this.ShowLoading = false;
+                this.ShowTicketsScreen = true;
                 //console.log(mp);
                 if(this.GridDataSource.length == 0)
                 {
@@ -358,15 +374,17 @@ export class TicketsList extends DataTableComponentBase implements OnInit {
             },
             err => {
                 this.ShowLoading = false;
+                this.ShowTicketsScreen = false;
                 this.GridDataSource = [];
                 this.setExportString(this.GridDataSource.length)
                 this.showError(err, 'Error retrieving tickets');
+                this.goHome();
 
             }
             );
     }
 
-    onExport(dt: DataTable, reportName: string = "") {
+    onExport(reportName: string = "") {
 
         if (reportName.length == 0) {
             let hiddenColumns: string[] = (<Column[]>this.GridColumns).filter(e => e.hidden == true).map(w => w.field);
@@ -378,14 +396,11 @@ export class TicketsList extends DataTableComponentBase implements OnInit {
             hiddenColumns.push("CallerIDUnknown");
             hiddenColumns.push("CanEdit");
             hiddenColumns.push("CanDelete");
-            
-            
 
-
-            this.doExport(dt, hiddenColumns, this.ExportFileName);
+            this.doExport(hiddenColumns, this.ExportFileName);
         }
         else {
-            this.doExportMSFT(dt, reportName, this.SelectedApp, this.fromDate.val(), this.fromTime.val(), this.toDate.val(), this.toTime.val());
+            this.doExportMSFT(reportName, this.SelectedApp, this.fromDate.val(), this.fromTime.val(), this.toDate.val(), this.toTime.val());
         }
 
     }
@@ -482,20 +497,20 @@ export class TicketsList extends DataTableComponentBase implements OnInit {
         return appName;
     }
 
-    onValueChosen(appAccountLOB: AppAccountLOB, dt: DataTable) {
-        //dt.reset();
+    onValueChosen(appAccountLOB: AppAccountLOB) {
+        
         //AppID
         //LineOfBusiness
         //CustomerNumber
         //AccountNumber
         //console.log(appAccountLOB);
         
+        
+        
+        this.ShowTicketsScreen = false;
         this.ShowLoading = true;
         
-        
         this.setupDateTimeBoxes();
-        
-        this.ShowTicketsScreen = true;
         
         this.ChosenAppDescription = this.setAppName(appAccountLOB);
         
@@ -510,12 +525,18 @@ export class TicketsList extends DataTableComponentBase implements OnInit {
         this.getReports();
         this.getLogo();
         this.getGridColumns();
+        
+        
+        
     }
     
-    onClose()
+    onAppChooserHidden()
     {
-        this.ShowAppChanger=false;
-        this.ShowTicketsScreen = false;
+        if(!this.ShowTicketsScreen)
+        {
+            window.location.replace("/");
+        }
+        
     }
     
 }

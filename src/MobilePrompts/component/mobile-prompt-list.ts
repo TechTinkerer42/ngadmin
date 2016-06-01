@@ -143,7 +143,7 @@ export class MobilePromptList extends DataTableComponentBase implements OnInit {
         hiddenColumns.push("promptType");
         hiddenColumns.push("promptBehaviorType"); //hide the non friendly columns
 
-        this.doExport(dt, hiddenColumns, this.ExportFileName);
+        this.doExport(hiddenColumns, this.ExportFileName);
     }
 
     //crud operations

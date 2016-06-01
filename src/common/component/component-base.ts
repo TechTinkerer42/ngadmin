@@ -8,7 +8,7 @@ export class ComponentBase {
 
     showError(err: any, message: string = '') {
         if (err.status == "403") {
-            message = "Unauthorized access";
+            message = "Session has timed out. Please login again.";
             localStorage.removeItem("id_token");
         }
         

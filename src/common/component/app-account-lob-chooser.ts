@@ -10,7 +10,7 @@ import {Button} from 'primeng/primeng';
 @Component({
     selector: 'app-account-lob-chooser',
     directives:[Button],
-    outputs: ['onValueChosen','onClose'],
+    outputs: ['onValueChosen'],
     inputs: ['selectedApp'],
     template: `
     
@@ -41,7 +41,6 @@ import {Button} from 'primeng/primeng';
 export class AppAccountLOBChooser extends ComponentBase {
 
     onValueChosen: EventEmitter<AppAccountLOB> = new EventEmitter<AppAccountLOB>();
-    onClose: EventEmitter<any> = new EventEmitter<any>();
     
     selectedApp: number;
     selectedAccount: string;
@@ -86,6 +85,7 @@ export class AppAccountLOBChooser extends ComponentBase {
     getAccountName(accountNumber:string)
     {
         let acct = this.accounts.filter(x=>x.accountNumber == accountNumber)[0];
+        console.log(acct);
         return acct.accountName;
     }
 

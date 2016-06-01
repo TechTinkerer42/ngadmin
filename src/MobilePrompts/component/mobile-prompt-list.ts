@@ -102,8 +102,6 @@ export class MobilePromptList extends DataTableComponentBase implements OnInit {
 
         this.buildColumns();
 
-        this.buildContextColumns();
-
         this.getGridDataSource(this.SelectedApp);
     }
 

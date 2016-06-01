@@ -1,23 +1,36 @@
 ﻿import {Component, ReflectiveInjector, OnInit, TemplateRef} from '@angular/core'
 import {TicketService} from '../service/tickets-service';
 import {Ticket} from '../service/ticket-model';
-import {ApplicationChooser} from '../../common/component/app-chooser'
+import {AppAccountLOBChooser} from '../../common/component/app-account-lob-chooser'
+import {AppAccountLOB} from '../../common/service/app-account-lob-model'
+
 import {Loading} from '../../common/component/loading'
-
-
 
 import {AuthService} from '../../common/service/auth-service';
 import {DataTableComponentBase} from '../../common/component/datatable-component-base';
 import {CanActivate} from '@angular/router-deprecated';
-import {InputText, DataTable, Column, Header, Footer, Button, ContextMenu, Dialog, SplitButton, SplitButtonItem,Checkbox} from 'primeng/primeng';
+import {InputText, DataTable, Column, Header, Footer, Button, ContextMenu, Dialog, SplitButton, SplitButtonItem, Checkbox} from 'primeng/primeng';
 
-
+import {Router} from '@angular/router-deprecated';
 
 @Component({
-    directives: [ApplicationChooser, DataTable, Column, Header, Footer, Button, ContextMenu, Dialog, Loading, SplitButton, SplitButtonItem,Checkbox],
+    directives: [AppAccountLOBChooser, DataTable, Column, Header, Footer, Button, ContextMenu, Dialog, Loading, SplitButton, SplitButtonItem, Checkbox],
     providers: [TicketService],
     template: `
-    <div class="row">
+    <p-dialog header="Choose Application:" [center]="true" [resizable]="false" [height]="300" [contentHeight]="300" [width]="500" [closeOnEscape]="true" [closable]="true" [draggable]="false" [(visible)]="ShowAppChanger" modal="modal" [showEffect]="fade">
+            <app-account-lob-chooser (onClose)="onClose($event)" (onValueChosen)="onValueChosen($event,dt)">Loading...</app-account-lob-chooser>
+    </p-dialog>
+    
+    <div class="row" [hidden]="!ShowTicketsScreen">
+        <div class="col-md-6 col-md-offset-1">
+            <button *ngIf="ChosenAppDescription" type="button" pButton (click)="ShowAppChanger=true" label="{{ChosenAppDescription}} - click to change"></button>
+        </div>
+        <div class="col-md-5 text-right" style="padding-bottom:5px;">
+            <img src="./images/{{LogoImage}}">
+        </div>
+    </div>
+    
+    <div class="row" [hidden]="!ShowTicketsScreen">
     
         <div class="col-md-1">
         <b>From:</b><br />
@@ -31,22 +44,23 @@ import {InputText, DataTable, Column, Header, Footer, Button, ContextMenu, Dialo
         <button type="button" pButton icon="fa-search" (click)="doSearch(dt);" label="Search"></button>
         </div>
     
-        <div class="col-md-11">
         
-            <app-chooser (onAppChosen)="onAppChosen($event,dt)">Loading...</app-chooser>
-            <br>
+    
+        <div class="col-md-11">
+            
             
             <p-contextMenu #cm [model]="ContextMenuItems"></p-contextMenu>
             <p-dataTable #dt [value]="GridDataSource" selectionMode="single" [paginator]="true" [rows]="NumberOfGridRows" filterDelay="0" [contextMenu]="cm" 
             [globalFilter]="gb" resizableColumns="true" columnResizeMode="expand" [(selection)]="SelectedTicket" (onFilter)="filterGrid(dt)" [rowsPerPageOptions]="[10,20,30]">
             <p-column [filter]="true" filterMatchMode="contains" *ngFor="let col of GridColumns" [sortable]="col.sortable" [field]="col.field" [header]="col.header" [hidden]="col.hidden" [style]="col.style">
                 <template let-col let-tickets="rowData">
-                    <span title="Unknown caller ID" style="color:red" *ngIf="showRedBackground(tickets,col)">
+                    <span title="Unknown caller ID" style="color:red" *ngIf="showRedBackground(tickets,col) && CallerIDChecking">
                         {{tickets[col.field]}}
                     </span>
                     <span *ngIf="!showRedBackground(tickets,col)">{{tickets[col.field]}}</span>
                 </template>
             </p-column>
+            <footer *ngIf="NoRecordsMessage">{{NoRecordsMessage}}</footer>
             </p-dataTable>
             
                 
@@ -71,7 +85,7 @@ import {InputText, DataTable, Column, Header, Footer, Button, ContextMenu, Dialo
     
     <p-dialog [center]="true" [resizable]="false" [height]="800" [contentHeight]="750" [width]="800" [closeOnEscape]="false" [closable]="false" [draggable]="true" [(visible)]="ShowModal" modal="modal" [showEffect]="fade"></p-dialog>
 
-    <p-dialog modal="true"  [center]="true" [resizable]="false" [height]="700" [contentHeight]="700" [width]="400" closeOnEscape="true" [closable]="true" [draggable]="false" [(visible)]="ShowColumnPicker" [showEffect]="fade">
+    <p-dialog modal="true"  [center]="true" [resizable]="false" [height]="700" [contentHeight]="700" [width]="400" closeOnEscape="true" [closable]="true" [draggable]="true" [(visible)]="ShowColumnPicker" [showEffect]="fade">
     <div class="container">
         <div class="row">
             <div class="ui-grid-col-1">
@@ -115,58 +129,59 @@ export class TicketsList extends DataTableComponentBase implements OnInit {
     toDate;
     toTime;
     SelectedApp: number = 0; //initial value
+    SelectedAccount: string = "0";
+    SelectedBusinessLine: number = 1;
+    SelectedCustomerNumber:number = 0;
     SelectedTicket: Ticket;
     TicketModel: Ticket = new Ticket();
     ShowModal: boolean = false;
     ExportFileName: string = "ticket_export.csv";
     ReportList: any[] = [];
+    CallerIDChecking: boolean = false;
+    ShowAppChanger:boolean = true;
+    ChosenAppDescription:string;
+    ShowTicketsScreen:boolean = false;
+    NoRecordsMessage:string;
+    LogoImage:string = "SPPLogo_Mobile.jpg";
 
     constructor(private ticketService: TicketService) {
         super();
 
-
+        
 
     }
-
+    
+    ngOnInit() {
+        
+        this.ContextMenuItems = [
+            { label: 'Edit Ticket', icon: 'fa-edit', command: (event) => this.editTicket() },
+            { label: 'Delete Ticket', icon: 'fa-close', command: (event) => this.deleteTicket() }
+        ];
+    }
+    
     showRedBackground(row, col) {
-
-        if (col.field == 'CallerID' || col.field == 'lngANI') {
+        if (col.field == 'CallerID') {
             if (row['CallerIDUnknown']) {
                 return row['CallerIDUnknown'] == 1 ? true : false;
             }
 
             return false;
         }
-
         if (col.field == 'lngANI') {
             if (row['ClosingCallerIDUnknown']) {
                 return row['ClosingCallerIDUnknown'] == 1 ? true : false;
             }
             return false;
         }
-
         return false;
-
     }
 
     //absolutely need these
-    doSearch(dt:DataTable)
-    {
-        //console.log('searching');
+    doSearch(dt: DataTable) {
         dt.reset();
+        this.ShowLoading = true;
         this.getGridDataSource();
         this.setExportString(this.GridDataSource.length);
-    }
-
-    ngOnInit() {
-        this.ShowLoading = true;
-        this.ContextMenuItems = [
-            { label: 'Edit Ticket', icon: 'fa-edit', command: (event) => this.editTicket() },
-            { label: 'Delete Ticket', icon: 'fa-close', command: (event) => this.deleteTicket() }
-        ];
-        
-        
-        
     }
 
     setupDateTimeBoxes() {
@@ -228,15 +243,39 @@ export class TicketsList extends DataTableComponentBase implements OnInit {
         });
     }
 
-    getReports(){
-        this.ticketService.getEntityByType(this.SelectedApp,"0", 0)
+    getReports() {
+        this.ticketService.getReports(this.SelectedApp, "0", 0)
             .map(res => res.json())
             .subscribe(reports => {
-                console.log(reports);
                 this.ReportList = reports;
 
             },
             err => {
+                this.ShowLoading = false;
+                this.showError(err, 'Error retrieving reports');
+            }
+            );
+    }
+    
+    getLogo() {
+        this.ticketService.getLogo(this.SelectedApp, "0", 0)
+            .map(res => res.json())
+            .subscribe(logo => {
+                if(logo)
+                {
+                    if(logo.length > 0)
+                    {
+                        let logoImage = logo[0].ConfigValue;
+                        this.LogoImage = logoImage;
+                    }
+                    else{
+                        
+                    }   
+                }
+
+            },
+            err => {
+                this.ShowLoading = false;
                 this.showError(err, 'Error retrieving reports');
             }
             );
@@ -245,8 +284,9 @@ export class TicketsList extends DataTableComponentBase implements OnInit {
 
     buildColumns(cols: any[]) {
 
+        //get the list of saved columns from the local storage
         this.SavedColumns = this.getSavedColumnVisibility(this.SelectedApp);
-        
+
         this.GridColumns = [];
 
         cols.forEach(x => {
@@ -255,34 +295,45 @@ export class TicketsList extends DataTableComponentBase implements OnInit {
             if (x.columnVisibility == 'hidden') {
                 hidden = true;
             }
-            
-            if(this.SavedColumns) //check to see what we have 
+
+            if (this.SavedColumns) //check to see if any saved columns exist
             {
-                hidden = this.checkColumnVisibility(x); 
+                hidden = this.checkColumnVisibility(x);
             }
-            
+
             this.GridColumns.push({ field: x.columnName, header: x.columnTitle, sortable: true, hidden: hidden, style: { "width": x.columnWidth } });
 
         })
 
 
-
         this.getGridDataSource();
+        
 
     }
 
-    getGridColumns(appNumber: number, accountNumber: string) {
+    getGridColumns() {
         this.GridColumns = [];
 
-        this.ticketService.getGridColumnsByAppID(appNumber, accountNumber)
+        this.ticketService.getGridColumnsByAppID(this.SelectedApp,this.SelectedAccount)
             .map(res => res.json())
             .subscribe(cols => {
                 
-                this.buildColumns(cols);
-                
+                if(cols.length > 0)
+                {
+                    this.buildColumns(cols);
 
+                    if (cols[0].callerIDFlagging != undefined && cols[0].callerIDFlagging) //comes from back end checks
+                    {
+                        this.CallerIDChecking = true;
+                    }    
+                }
+                else{
+                    this.ShowLoading = false;
+                    alert('Grid columns not setup for this account!');
+                }
             },
             err => {
+                this.ShowLoading = false;
                 this.showError(err, 'Error retrieving grid columns');
             }
             );
@@ -290,16 +341,20 @@ export class TicketsList extends DataTableComponentBase implements OnInit {
 
 
     getGridDataSource() {
+        this.NoRecordsMessage = '';
 
-        this.ShowLoading = true;
-
-        this.ticketService.getTickets(this.SelectedApp, "0", this.fromDate.val(), this.fromTime.val(), this.toDate.val(), this.toTime.val())
+        this.ticketService.getTickets(this.SelectedApp,this.SelectedCustomerNumber,this.SelectedAccount, this.SelectedBusinessLine,this.fromDate.val(), this.fromTime.val(), this.toDate.val(), this.toTime.val())
             .map(res => res.json())
             .subscribe(mp => {
                 this.GridDataSource = mp;
                 this.setExportString(this.GridDataSource.length); //put in an event that gets the rowcount and returns it and keep one to update button too
                 this.ShowLoading = false;
-                
+                //console.log(mp);
+                if(this.GridDataSource.length == 0)
+                {
+                    this.NoRecordsMessage = "No records found";
+                }
+
             },
             err => {
                 this.ShowLoading = false;
@@ -311,10 +366,9 @@ export class TicketsList extends DataTableComponentBase implements OnInit {
             );
     }
 
-    onExport(dt: DataTable, reportName:string = "") {
+    onExport(dt: DataTable, reportName: string = "") {
 
-        if(reportName.length == 0)
-        {
+        if (reportName.length == 0) {
             let hiddenColumns: string[] = (<Column[]>this.GridColumns).filter(e => e.hidden == true).map(w => w.field);
             hiddenColumns.push("Store_TimeZoneAdjustment");
             hiddenColumns.push("DateOpened");
@@ -322,13 +376,18 @@ export class TicketsList extends DataTableComponentBase implements OnInit {
             hiddenColumns.push("TotalRows");
             hiddenColumns.push("ClosingCallerIDUnknown");
             hiddenColumns.push("CallerIDUnknown");
+            hiddenColumns.push("CanEdit");
+            hiddenColumns.push("CanDelete");
             
-            this.doExport(dt, hiddenColumns, this.ExportFileName);    
+            
+
+
+            this.doExport(dt, hiddenColumns, this.ExportFileName);
         }
-        else{
-            this.doExportMSFT(dt,reportName,this.SelectedApp,this.fromDate.val(),this.fromTime.val(),this.toDate.val(),this.toTime.val());
+        else {
+            this.doExportMSFT(dt, reportName, this.SelectedApp, this.fromDate.val(), this.fromTime.val(), this.toDate.val(), this.toTime.val());
         }
-        
+
     }
 
     //crud operations
@@ -382,30 +441,81 @@ export class TicketsList extends DataTableComponentBase implements OnInit {
         //var foundPrompt = this.GridDataSource.filter(x => x.promptID == changedRow.promptID);
 
         //if (foundPrompt[0]) {
-          //  this.GridDataSource[this.GridDataSource.indexOf(foundPrompt[0])] = changedRow;
+        //  this.GridDataSource[this.GridDataSource.indexOf(foundPrompt[0])] = changedRow;
         //}
     }
 
-    onAppChosen(appNumber: number, dt: DataTable) {
-        
-        if(appNumber == 0)
+    translateLOB(lob:number) : string
+    {
+        switch(lob)
         {
-            alert('User has no applications associated with their profile');    
-        }
-        else{
-            dt.reset();
-            this.GridDataSource = [];
-            this.setExportString(this.GridDataSource.length);
-            this.SelectedApp = appNumber;
-            this.setupDateTimeBoxes();
-            this.getReports();
+            case 2:
+            return "Snow"
             
-            this.getGridColumns(appNumber, "0");
+            case 3:
+            return "Interior"
+            
+            case 4:
+            return "Land/Lot"
+            
+            default:
+            return lob.toString();
+            
+        }
+    }
+
+    setAppName(appAccountLOB: AppAccountLOB) : string
+    {
+        console.log(appAccountLOB);
+        let appName = appAccountLOB.SelectedAppName;
+        
+        if(appAccountLOB.AppID == 6 || appAccountLOB.AppID == 74)
+        {
+            appName = appName + " - " + appAccountLOB.AccountName.replace(new RegExp("_","g"), " ") + "  (" + appAccountLOB.AccountNumber + " / " +  appAccountLOB.CustomerNumber + ")";
+            
+            if(appAccountLOB.AppID == 6)
+            {
+                appName = appName + " - " +  this.translateLOB(appAccountLOB.LineOfBusiness);
+            }
         }
         
-        
-        
-        
-        
+        return appName;
     }
+
+    onValueChosen(appAccountLOB: AppAccountLOB, dt: DataTable) {
+        //dt.reset();
+        //AppID
+        //LineOfBusiness
+        //CustomerNumber
+        //AccountNumber
+        //console.log(appAccountLOB);
+        
+        this.ShowLoading = true;
+        
+        
+        this.setupDateTimeBoxes();
+        
+        this.ShowTicketsScreen = true;
+        
+        this.ChosenAppDescription = this.setAppName(appAccountLOB);
+        
+        this.ShowAppChanger = false;
+        this.SelectedApp = appAccountLOB.AppID;
+        this.SelectedAccount = appAccountLOB.AccountNumber;
+        this.SelectedBusinessLine = appAccountLOB.LineOfBusiness;
+        this.SelectedCustomerNumber = appAccountLOB.CustomerNumber;
+        
+        this.GridDataSource = [];
+        this.setExportString(0);
+        this.getReports();
+        this.getLogo();
+        this.getGridColumns();
+    }
+    
+    onClose()
+    {
+        this.ShowAppChanger=false;
+        this.ShowTicketsScreen = false;
+    }
+    
 }

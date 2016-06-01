@@ -17,7 +17,7 @@ export class DataTableComponentBase extends ComponentBase {
     ContextMenuItems: MenuItem[];
     ClearFiltersNeeded:boolean = false;
     GridColumns: any[];
-    SavedColumns: any[];
+    SavedColumns: any[]; //keeps track of the saved columns
     GridDataSource:any[];
     NumberOfGridRows: number = 20;
     
@@ -97,10 +97,6 @@ export class DataTableComponentBase extends ComponentBase {
         
     }
     
-    buildContextColumns() {
-        this.ContextMenuItems = [];
-        
-    }
     
     cloneObject(p: any): any {
         let clonedObject: any = new Object();

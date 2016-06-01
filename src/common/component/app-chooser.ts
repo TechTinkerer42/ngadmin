@@ -43,7 +43,7 @@ export class ApplicationChooser extends ComponentBase  {
                     this.onAppChosen.emit(firstApp);
             }},
                  err => {
-                this.showError(err, 'Error retrieving reports');
+                this.showError(err, 'Error retrieving applications');
             }
                  
             );

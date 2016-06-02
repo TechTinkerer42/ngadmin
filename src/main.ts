@@ -1,7 +1,7 @@
 
 
 import {bootstrap}  from '@angular/platform-browser-dynamic';
-import {Component, provide} from '@angular/core';
+import {Component, provide,OnInit} from '@angular/core';
 import {HttpHelper} from './common/service/http-helper';
 import {CommonService} from './common/service/common-service';
 import {AuthService} from './common/service/auth-service';
@@ -13,14 +13,12 @@ import {HTTP_PROVIDERS} from '@angular/http';
 import { 
     ROUTER_DIRECTIVES, 
     ROUTER_PROVIDERS, 
-    ROUTER_PRIMARY_COMPONENT, 
-    RouteConfig,
+    Routes,
     Router
-    
-     
-    
+} from '@angular/router';
 
-} from '@angular/router-deprecated';
+
+
 
 
 import {
@@ -49,16 +47,20 @@ import {enableProdMode} from '@angular/core';
 
         
 
-@RouteConfig([
-    { path: '/admin/...', name: 'Admin', component: Admin,},
-    { path: '/login/', name: 'Login', component: LoginComponent, useAsDefault: true },
+@Routes([
+    { path: '/admin', component: Admin,},
+    { path: '/', component: LoginComponent},
         
         
 ])
 
 
-export class Main   {
+export class Main implements OnInit  {
 
+    ngOnInit() {
+        //alert('starting');
+        //this.router.navigate(['/login']);
+    }
     
     constructor( private router: Router) {
         
@@ -77,7 +79,7 @@ bootstrap(Main, [
     CommonService,
     HTTP_PROVIDERS,
     ROUTER_PROVIDERS,
-    provide(ROUTER_PRIMARY_COMPONENT, { useValue: Main }),
+    //provide(ROUTER_PRIMARY_COMPONENT, { useValue: Main }),
     provide(APP_BASE_HREF, { useValue: '/' }),
     provide(LocationStrategy, { useClass: HashLocationStrategy })
 ])

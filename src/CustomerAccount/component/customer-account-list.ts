@@ -106,7 +106,7 @@ export class CustomerAccountList extends DataTableComponentBase implements OnIni
 
         let hiddenColumns: string[] = (<Column[]>this.GridColumns).filter(e => e.hidden == true).map(w => w.field);
         
-        this.doExport(dt, hiddenColumns, this.ExportFileName);
+        this.doExport(hiddenColumns, this.ExportFileName);
     }
 
     //crud operations

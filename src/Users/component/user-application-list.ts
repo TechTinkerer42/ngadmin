@@ -111,7 +111,7 @@ export class UserApplicationList extends DataTableComponentBase implements OnIni
     onExport(dt: DataTable) {
 
         let hiddenColumns: string[] = (<Column[]>this.GridColumns).filter(e => e.hidden == true).map(w => w.field);
-        this.doExport(dt, hiddenColumns, this.ExportFileName);
+        this.doExport(hiddenColumns, this.ExportFileName);
     }
 
   

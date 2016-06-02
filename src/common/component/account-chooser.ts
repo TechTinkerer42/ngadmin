@@ -30,7 +30,7 @@ export class AccountChooser extends ComponentBase {
         }
         else{
             this.accounts = [];
-            onAccountChosen
+            
         }
         
         

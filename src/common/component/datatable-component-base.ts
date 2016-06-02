@@ -40,9 +40,7 @@ export class DataTableComponentBase extends ComponentBase {
         return true;
     }
     
-    getSavedColumnVisibility(id){
-        let uName:string = localStorage.getItem("u_name");
-        let storageName:string = "grid_columns_" + uName + "_" + id;
+    getSavedColumnVisibility(storageName:string){
         let gCols = localStorage.getItem(storageName);
         
         if(gCols != null)
@@ -53,13 +51,11 @@ export class DataTableComponentBase extends ComponentBase {
         return null;
     }
     
-    saveColumnVisibility(id){
-        let uName:string = localStorage.getItem("u_name");
-        let storageName:string = "grid_columns_" + uName + "_" + id;
+    saveColumnVisibility(storageName:string){
         localStorage.setItem(storageName,JSON.stringify(this.GridColumns));
     }
     
-    checkAll(checkbox,id){
+    checkAll(checkbox,storageName:string){
         if(checkbox)
         {
             this.GridColumns.forEach(x => x.hidden = false);
@@ -67,13 +63,13 @@ export class DataTableComponentBase extends ComponentBase {
         else{
             this.GridColumns.forEach(x => x.hidden = true);
         }
-        this.saveColumnVisibility(id);
+        this.saveColumnVisibility(storageName);
     }
     
-    checkBoxChanged(checked,col,id)
+    checkBoxChanged(checked,col,storageName)
     {
         col.hidden = !checked;
-        this.saveColumnVisibility(id);
+        this.saveColumnVisibility(storageName);
     }
     
     getExportRowCount(): number {

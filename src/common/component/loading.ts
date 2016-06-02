@@ -7,18 +7,18 @@ import {Dialog} from 'primeng/primeng';
     selector: 'loading',
     inputs: ['LoadingMessage','ShowLoading'],
     directives:[Dialog],
+    styles: [`
+    .ui-dialog-content {
+      background: green;
+    }
+    `],
     template: `
-    <p-dialog header="{{LoadingMessage}}" modal="true" [center]="true" [resizable]="false" [height]="100" [contentHeight]="100" [width]="200" closeOnEscape="false" [closable]="false" [draggable]="false" [visible]="ShowLoading" [showEffect]="fade">
+    <p-dialog #load (onBeforeShow)="load.center()" styleClass="ui-dialog-content" header="{{LoadingMessage}}" modal="true" [center]="true" [resizable]="false" [height]="100" [contentHeight]="100" [width]="200" closeOnEscape="false" [closable]="false" [draggable]="false" [visible]="ShowLoading" [showEffect]="fade">
     <div class="text-center" style="font-size:16px;"><i class='fa fa-spinner fa-spin fa-3x'></i></div>
     </p-dialog>
     `
 })
 export class Loading {
-
-//<div class="text-center alert alert-success" style="padding:20px;font-size:18px;" *ngIf="ShowLoading">
-  //  <i class='fa fa-spinner fa-spin'></i> {{LoadingMessage}}
-    //</div>
-
 
     LoadingMessage:string;
     ShowLoading:boolean;

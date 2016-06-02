@@ -75,12 +75,10 @@ export class LoginComponent extends ComponentBase implements OnInit {
         this.buildForm();
         if(this.authService.isTokenValid())
         {
-            this.authService.navigateTo('/Admin/AdminHome');
+            this.authService.navigateTo(['/admin/home']);
             
-            //this.alertType = "info";
-            //this.alertMessage = "Successfully logged in";
+          
         }
-        
         
     }
     
@@ -141,9 +139,11 @@ export class LoginComponent extends ComponentBase implements OnInit {
                 
                 this.waiting = false;
                 
-                this.authService.navigateTo('/Admin');
-                 //this.alertType = "info";
-                 //this.alertMessage = "Successfully logged in";
+                
+                
+                this.authService.navigateTo(['/admin/home']);
+                 
+                 
                 
                 
             },

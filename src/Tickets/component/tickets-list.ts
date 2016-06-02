@@ -11,44 +11,38 @@ import {DataTableComponentBase} from '../../common/component/datatable-component
 import {CanActivate} from '@angular/router-deprecated';
 import {InputText, DataTable, Column, Header, Footer, Button, ContextMenu, Dialog, SplitButton, SplitButtonItem, Checkbox} from 'primeng/primeng';
 
-import {Router} from '@angular/router-deprecated';
+
 
 @Component({
     directives: [AppAccountLOBChooser, DataTable, Column, Header, Footer, Button, ContextMenu, Dialog, Loading, SplitButton, SplitButtonItem, Checkbox],
     providers: [TicketService],
     template: `
-    <p-dialog (onAfterHide)="onAppChooserHidden()" header="Choose Application:" [center]="true" [resizable]="false" [height]="300" [contentHeight]="300" [width]="500" [closeOnEscape]="true" [closable]="true" [draggable]="false" [(visible)]="ShowAppChanger" modal="modal" [showEffect]="fade">
+    <p-dialog #ac (onBeforeShow)="ac.center()" (onAfterHide)="onAppChooserHidden()" header="Choose Application:" [resizable]="false" [height]="300" [contentHeight]="300" [width]="500" [closeOnEscape]="true" [closable]="true" [draggable]="false" [(visible)]="ShowAppChanger" modal="modal" [showEffect]="fade">
             <app-account-lob-chooser (onValueChosen)="onValueChosen($event)">Loading...</app-account-lob-chooser>
     </p-dialog>
     
-    <div class="row" [hidden]="!ShowTicketsScreen">
-        <div class="col-md-6 col-md-offset-1">
-            <button *ngIf="ChosenAppDescription" type="button" pButton (click)="ShowAppChanger=true" label="{{ChosenAppDescription}} - click to change"></button>
+    <div class="row" [hidden]="GridColumns.length == 0">
+        <div class="col-md-1">
+            <b>From:</b><br />
+            <input type="text" class="form-control" id="fromDate" value="" /> 
+            <input type="text" class="form-control" id="fromTime" value="12:00am" /> 
+            <br />
+            <b>To:</b><br />
+            <input type="text" class="form-control" id="toDate" value=""/> 
+            <input type="text" class="form-control" id="toTime" value="12:00am" /> 
+            <br>
+            <button type="button" pButton icon="fa-search" (click)="doSearch();" label="Search"></button>
+        </div>
+        <div class="col-md-6"><br>
+            <button *ngIf="GridColumns.length > 0" type="button" pButton (click)="ShowAppChanger=true" label="{{ChosenAppDescription}} - click to change"></button><br>
         </div>
         <div class="col-md-5 text-right" style="padding-bottom:5px;">
             <img src="./images/{{LogoImage}}">
         </div>
-    </div>
-    
-    <div class="row" [hidden]="!ShowTicketsScreen">
-    
-        <div class="col-md-1">
-        <b>From:</b><br />
-        <input type="text" class="form-control" id="fromDate" value="" /> 
-        <input type="text" class="form-control" id="fromTime" value="12:00am" /> 
-        <br />
-        <b>To:</b><br />
-        <input type="text" class="form-control" id="toDate" value=""/> 
-        <input type="text" class="form-control" id="toTime" value="12:00am" /> 
-        <br>
-        <button type="button" pButton icon="fa-search" (click)="doSearch();" label="Search"></button>
-        </div>
-    
-        
     
         <div class="col-md-11">
             
-            
+            <br>
             <p-contextMenu #cm [model]="ContextMenuItems"></p-contextMenu>
             <p-dataTable *ngIf="GridColumns.length > 0" #dt [value]="GridDataSource" selectionMode="single" [paginator]="true" [rows]="NumberOfGridRows" filterDelay="0" [contextMenu]="cm" 
             [globalFilter]="gb" resizableColumns="true" columnResizeMode="expand" [(selection)]="SelectedTicket" (onFilter)="filterGrid()" [rowsPerPageOptions]="[10,20,30]">
@@ -89,12 +83,12 @@ import {Router} from '@angular/router-deprecated';
     <div class="container">
         <div class="row">
             <div class="ui-grid-col-1">
-            <p-checkbox #cball (onChange)="checkAll($event,SelectedApp)"></p-checkbox>
+            <p-checkbox #cball (onChange)="checkAll($event,getStorageName())"></p-checkbox>
             </div>
             <div class="ui-grid-col-11"><label class="ui-widget">{{cball.checked ? 'Select None' : 'Select All'}}</label></div>  
             <div *ngFor="let col of GridColumns">
                 <div class="ui-grid-col-1">
-                    <p-checkbox [ngModel]="!col.hidden" (onChange)="checkBoxChanged($event,col,SelectedApp)"></p-checkbox>
+                    <p-checkbox [ngModel]="!col.hidden" (onChange)="checkBoxChanged($event,col,getStorageName())"></p-checkbox>
                 </div>
                 <div class="ui-grid-col-11"><label class="ui-widget">{{col.header}}</label></div>    
             </div>
@@ -102,6 +96,8 @@ import {Router} from '@angular/router-deprecated';
     </div>
     </p-dialog>
     <loading LoadingMessage="Loading..." [ShowLoading]="ShowLoading"></loading>
+    
+    
     
     `
 })
@@ -140,7 +136,6 @@ export class TicketsList extends DataTableComponentBase implements OnInit {
     CallerIDChecking: boolean = false;
     ShowAppChanger:boolean = true;
     ChosenAppDescription:string;
-    ShowTicketsScreen:boolean = false;
     NoRecordsMessage:string;
     LogoImage:string = "SPPLogo_Mobile.jpg";
 
@@ -154,6 +149,8 @@ export class TicketsList extends DataTableComponentBase implements OnInit {
 
     }
     
+    
+    
     ngOnInit() {
         
         this.ContextMenuItems = [
@@ -163,7 +160,18 @@ export class TicketsList extends DataTableComponentBase implements OnInit {
         
     }
     
-   
+    getStorageName():string
+    {
+        let uName:string = localStorage.getItem("u_name");
+        let storageName:string = "grid_columns_" + uName + "_" + this.SelectedApp;
+        if(this.SelectedApp == 6 || this.SelectedApp == 74)
+        {
+            storageName += "_" + this.SelectedAccount;
+        }
+        return storageName;
+        
+    }
+    
     showRedBackground(row, col) {
         if (col.field == 'CallerID') {
             if (row['CallerIDUnknown']) {
@@ -255,8 +263,7 @@ export class TicketsList extends DataTableComponentBase implements OnInit {
             },
             err => {
                 this.ShowLoading = false;
-                this.showError(err, 'Error retrieving reports');
-                this.goHome();
+                this.showError(err, 'Error retrieving report list');
             }
             );
     }
@@ -281,7 +288,7 @@ export class TicketsList extends DataTableComponentBase implements OnInit {
             err => {
                 this.ShowLoading = false;
                 this.showError(err, 'Error retrieving logo');
-                this.goHome();
+                
             }
             );
     }
@@ -291,7 +298,7 @@ export class TicketsList extends DataTableComponentBase implements OnInit {
 
 
         //get the list of saved columns from the local storage
-        this.SavedColumns = this.getSavedColumnVisibility(this.SelectedApp);
+        this.SavedColumns = this.getSavedColumnVisibility(this.getStorageName());
 
         this.GridColumns = [];
 
@@ -335,23 +342,16 @@ export class TicketsList extends DataTableComponentBase implements OnInit {
                 }
                 else{
                     this.ShowLoading = false;
-                    this.ShowTicketsScreen = false;
-                    alert('Grid columns not setup for this account!');
-                    this.goHome();
+                    this.showError(null, 'Grid columns not setup for this account!');
+                    
                 }
             },
             err => {
                 this.ShowLoading = false;
-                this.ShowTicketsScreen = false;
                 this.showError(err, 'Error retrieving grid columns');
-                this.goHome();
+                
             }
             );
-    }
-
-    goHome()
-    {
-        window.location.replace("/");
     }
 
     getGridDataSource() {
@@ -364,7 +364,6 @@ export class TicketsList extends DataTableComponentBase implements OnInit {
                 this.GridDataSource = mp;
                 this.setExportString(this.GridDataSource.length); //put in an event that gets the rowcount and returns it and keep one to update button too
                 this.ShowLoading = false;
-                this.ShowTicketsScreen = true;
                 //console.log(mp);
                 if(this.GridDataSource.length == 0)
                 {
@@ -374,11 +373,10 @@ export class TicketsList extends DataTableComponentBase implements OnInit {
             },
             err => {
                 this.ShowLoading = false;
-                this.ShowTicketsScreen = false;
                 this.GridDataSource = [];
                 this.setExportString(this.GridDataSource.length)
                 this.showError(err, 'Error retrieving tickets');
-                this.goHome();
+                
 
             }
             );
@@ -507,7 +505,6 @@ export class TicketsList extends DataTableComponentBase implements OnInit {
         
         
         
-        this.ShowTicketsScreen = false;
         this.ShowLoading = true;
         
         this.setupDateTimeBoxes();
@@ -532,7 +529,7 @@ export class TicketsList extends DataTableComponentBase implements OnInit {
     
     onAppChooserHidden()
     {
-        if(!this.ShowTicketsScreen)
+        if(this.GridColumns.length == 0)
         {
             window.location.replace("/");
         }

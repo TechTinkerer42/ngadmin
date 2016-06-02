@@ -267,8 +267,8 @@ export class EditMobilePrompt extends ComponentBase {
                 this.keyPickerShowing = true;
             },
             err => {
-                console.log(err);
-                alert("Error retrieving mobile audio keys");
+                this.showError(err,"Error retrieving mobile audio keys");
+                
             }
             );
     }

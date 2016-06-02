@@ -88,6 +88,7 @@ export class MobilePromptList extends DataTableComponentBase implements OnInit {
     
     constructor(private mobilePromptService: MobilePromptService) {
         super();
+        
     }
 
     //absolutely need these

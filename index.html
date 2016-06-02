@@ -1,6 +1,7 @@
 <html>
 
 <head>
+  <base href="/">
   <title>NG Admin!!</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -37,6 +38,19 @@
 
 <body>
   
+<div class="error-box text-center" id="errorspot" style="display:none">
+<div class="alert alert-danger" role="alert">
+<i class='fa fa-exclamation-triangle fa-3x'></i><span style="font-size:18px;padding-left:15px;"><strong>Oops! - a system error has occurred</strong></span>
+</div>
+<div class="col-md-12" id="errorMessage"></div>  
+<div class="col-md-12" style="padding-top:25px;">
+  The issue has been reported and we apologize for any inconvenience
+</div>
+<div class="col-md-12" style="padding-top:50px;">
+  <input type="button" id="errorCloseButton" value="Close"></button>
+</div>
+</div>
+
   
 <div class="container-fluid">
   <app>

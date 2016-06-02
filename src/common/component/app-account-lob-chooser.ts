@@ -17,7 +17,7 @@ import {Button} from 'primeng/primeng';
     <div *ngIf="alertMessage"><div class="alert alert-info" role="alert">{{alertMessage}}</div></div>
     <select *ngIf="ShowAppsDropDown" class="form-control" #appchoser (change)="fillAccounts(appchoser.value)">
         <option *ngIf="!applications">Loading...</option>
-        <option [selected]="app.intUniqueApplicationNum == selectedApp" value="{{app.intUniqueApplicationNum}}" *ngFor="let app of applications">{{app.strApplicationName}} ({{app.intUniqueApplicationNum}})</option>
+        <option [selected]="app.intUniqueApplicationNum == selectedApp" value="{{app.intUniqueApplicationNum}}" *ngFor="let app of applications">{{app.appChooserName}}</option>
     </select>
     <br>
     <div *ngIf="accounts.length > 0" style="padding-bottom:25px">
@@ -59,6 +59,7 @@ export class AppAccountLOBChooser extends ComponentBase {
         this.commonService.getApplications()
             .subscribe(res => {
                 this.applications = res;
+                console.log(res);
                 if (this.applications.length == 0) {
                     this.ShowAppsDropDown = false;
                     this.alertMessage = "No applications associated with this user";
@@ -71,6 +72,7 @@ export class AppAccountLOBChooser extends ComponentBase {
                 }
             },
             err => {
+                this.ShowAppsDropDown = false;
                 this.alertMessage = "Error retrieving applications";
             }
             );
@@ -132,14 +134,21 @@ export class AppAccountLOBChooser extends ComponentBase {
 
     fillLineOfBusiness(accountNumber: string) {
         this.lobs = [];
-        
+        this.ShowSelectButton = false;
         this.selectedAccount = accountNumber; 
         
         let acct = this.accounts.find(x => x.accountNumber == accountNumber);
 
         if (acct) {
             if (acct.interiorCustomerNumber != 'NA') {
-                this.lobs.push({ name: 'Interior', number: 3, customerNumber: acct.interiorCustomerNumber});
+                if(this.selectedApp == 74)
+                {
+                    this.lobs.push({ name: 'Interior', number: 1, customerNumber: acct.interiorCustomerNumber});
+                }
+                else{
+                    this.lobs.push({ name: 'Interior', number: 3, customerNumber: acct.interiorCustomerNumber});
+                }
+                
             }
             if (acct.landCustomerNumber != 'NA') {
                 this.lobs.push({ name: 'Land', number: 4, customerNumber: acct.landCustomerNumber});
@@ -176,7 +185,11 @@ export class AppAccountLOBChooser extends ComponentBase {
     
     doSearch()
     {
-        this.onValueChosen.emit(this.appAccountLOB)
+        if(this.appAccountLOB.LineOfBusiness > 0)
+        {
+            this.onValueChosen.emit(this.appAccountLOB)    
+        }
+        
     }
 
 }

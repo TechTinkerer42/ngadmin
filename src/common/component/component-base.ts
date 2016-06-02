@@ -8,7 +8,7 @@ export class ComponentBase {
 
     showError(err: any, message: string = '') {
         if (err.status == "403") {
-            message = "Session has timed out. Please login again.";
+            message = "Session has timed out or you don't have credentials for this area. Please login again.";
             localStorage.removeItem("id_token");
         }
         
@@ -16,8 +16,17 @@ export class ComponentBase {
         {
             //message += "\r\n" + err._body;
         }
+        let errorspot = $('#errorspot');
+        let errorMessage = $('#errorMessage');
+        let errorCloseButton = $('#errorCloseButton');
+        errorMessage.text(message);
+        errorspot.show();
         
-        alert(message);
+        errorCloseButton.on("click", ()=>{
+            errorspot.hide();
+            window.location.replace("/");
+        });
+        
     }
     
     errorClassToUse(form: ControlGroup, inputName: string, isGroup: boolean = false): string {

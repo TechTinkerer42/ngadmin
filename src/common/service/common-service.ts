@@ -32,7 +32,11 @@ export class CommonService {
             .map((response) => response.json());
     }
     
+    getAdminMenuItems() { 
 
+        return this.httpHelper.makeHttpCall('AngularAdmin/GetAdminMenuItems','', 'POST')
+            .map((response) => response.json());
+    }
 
     
 

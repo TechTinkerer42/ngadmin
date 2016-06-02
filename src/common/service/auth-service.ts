@@ -1,7 +1,7 @@
 ﻿
 import {Injectable,Inject,Injector,} from'@angular/core';
 
-import {Router} from '@angular/router-deprecated';
+import {Router} from '@angular/router';
 
 import {JwtHelper} from 'angular2-jwt';
 
@@ -48,25 +48,22 @@ export class AuthService {
         return isValid;
     }
 
-    public navigateTo(location:string)
+    public navigateTo(location:string[])
     {
             let injector: Injector = appInjector(); // get the stored reference to the injector
 	        let router: Router = injector.get(Router);
-            router.navigate([location]);
+            router.navigate(location);
     }
 
-
+    
     public checkLogin(next: any, previous: any): boolean {
         
         let isValid: boolean = this.isTokenValid();
         
         if (!isValid) {
-            this.navigateTo('/Login');
             
-            
-            //let injector: Injector = appInjector(); // get the stored reference to the injector
-	        //let router: Router = injector.get(Router);
-            //router.navigate(['/Login']);
+            this.navigateTo(['/']);
+           
         }
 
         return isValid;
